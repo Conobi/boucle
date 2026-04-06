@@ -2,12 +2,32 @@ from sys.info import size_of, align_of
 
 
 @always_inline("nodebug")
+fn _aligned_u64[T: AnyType]():
+    """Compile-time assertion that a type has at least 8-byte alignment.
+    [Linux]: https://github.com/torvalds/linux/blob/v6.7/include/uapi/linux/types.h#L47.
+    """
+    constrained[align_of[T]() >= 8]()
+
+
+@always_inline("nodebug")
 fn _size_eq[T: AnyType, I: AnyType]():
     """Compile-time assertion that two types have the same size."""
     constrained[size_of[T]() == size_of[I]()]()
 
 
 @always_inline("nodebug")
+fn _size_eq[T: AnyType, size: IntLiteral]():
+    """Compile-time assertion that a type has the given size."""
+    constrained[size_of[T]() == size]()
+
+
+@always_inline("nodebug")
 fn _align_eq[T: AnyType, I: AnyType]():
     """Compile-time assertion that two types have the same alignment."""
     constrained[align_of[T]() == align_of[I]()]()
+
+
+@always_inline("nodebug")
+fn _align_eq[T: AnyType, align: IntLiteral]():
+    """Compile-time assertion that a type has the given alignment."""
+    constrained[align_of[T]() == align]()
