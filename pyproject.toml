@@ -1,0 +1,15 @@
+[project]
+name = "boucle"
+version = "0.1.0"
+description = "Platform-agnostic I/O library for Mojo"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "mojox",
+]
+
+[tool.uv]
+package = false
