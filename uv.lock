@@ -1,0 +1,51 @@
+version = 1
+revision = 3
+requires-python = ">=3.10"
+
+[[package]]
+name = "boucle"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "mojox" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "mojox" }]
+
+[[package]]
+name = "mojo-compiler"
+version = "0.26.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mojo-compiler-mojo-libs" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/53/d4/09a8d8a98aadf260f466b2e35c62aff253600dce8d79e05170ee7ae5d75f/mojo_compiler-0.26.2.0-py3-none-macosx_13_0_arm64.whl", hash = "sha256:d9ff03ed5db5f921d7ef5c7e4afcb8bc1cb2ff4ff40ee0403f248d23f85d5881", size = 68204393, upload-time = "2026-03-19T15:39:15.448Z" },
+    { url = "https://files.pythonhosted.org/packages/df/54/c6d06b05a51422872cae7e8ed4161bc7585db299a1239dcfca06cb5f3eb1/mojo_compiler-0.26.2.0-py3-none-manylinux_2_34_aarch64.whl", hash = "sha256:a88837d71435330d1c100a8f16d9ef8221d366227c0eb1234d60e8cf06a5e48c", size = 88668407, upload-time = "2026-03-19T15:38:38.036Z" },
+    { url = "https://files.pythonhosted.org/packages/93/a5/8125e0025a9cc0d562c7b814bcb073bf80d55e41398bf74b58a2965c7c0a/mojo_compiler-0.26.2.0-py3-none-manylinux_2_34_x86_64.whl", hash = "sha256:afb81f9146369bbef7f05899b95ce3897e598be69e0109694a85278613e84e1f", size = 93264509, upload-time = "2026-03-19T15:38:43.606Z" },
+]
+
+[[package]]
+name = "mojo-compiler-mojo-libs"
+version = "0.26.2.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/db/ef741e589787d5ea5503a51ced4992285d83c40afd39b3511e1e8631e286/mojo_compiler_mojo_libs-0.26.2.0-py3-none-any.whl", hash = "sha256:e4419e4b744e88fc187a552d0e9cb4145c5b1ad1a3a4efff1301e13e7c70b55c", size = 12643744, upload-time = "2026-03-19T15:38:51.061Z" },
+]
+
+[[package]]
+name = "mojox"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mojo-compiler" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bb/55/81b7c4812ae6b8f7c37ba04fd33daf0ffc65d2101937f54696ff3cdc48cf/mojox-0.1.0.tar.gz", hash = "sha256:a42c3a9969c736208ed0376f0518192023ab142e3c2b9ce3edf9af6d0e99b4b8", size = 1634, upload-time = "2026-04-01T14:30:55.161Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/e4/c2c4c23c9cd9e5239ab905b74170b0d36cfce2fcab5e56e0dd055279c4c1/mojox-0.1.0-py3-none-any.whl", hash = "sha256:66bab8746283fb0b3e2093f98ebeeb3bb54d12cd394d236da94a9da37ec0314d", size = 2722, upload-time = "2026-04-01T14:30:56.388Z" },
+]
