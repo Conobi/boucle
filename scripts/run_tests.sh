@@ -25,6 +25,7 @@ TESTS=(
     tests/boucle/net/test_socket.mojo
     tests/boucle/test_completion.mojo
     tests/boucle/test_completion_io.mojo
+    tests/boucle/test_interest.mojo
 )
 
 cd "$PROJECT_DIR"

@@ -1,0 +1,41 @@
+"""Interest flags for readiness-based I/O.
+
+Declares what I/O events you care about on a resource.
+Used with `ReadinessLoop.register()` to tell the OS what to watch for.
+"""
+
+from boucle._sys.linux.raw.x86_64.epoll import EPOLLIN, EPOLLOUT
+
+
+struct Interest(TrivialRegisterPassable, Defaultable):
+    """I/O interest flags — what events to monitor."""
+
+    comptime READABLE = Self(EPOLLIN)
+    comptime WRITABLE = Self(EPOLLOUT)
+
+    var value: UInt32
+
+    @always_inline("nodebug")
+    fn __init__(out self):
+        self.value = 0
+
+    @always_inline("nodebug")
+    @implicit
+    fn __init__(out self, value: UInt32):
+        self.value = value
+
+    @always_inline("nodebug")
+    fn __or__(self, rhs: Self) -> Self:
+        return self.value | rhs.value
+
+    @always_inline("nodebug")
+    fn __ior__(mut self, rhs: Self):
+        self = self | rhs
+
+    @always_inline("nodebug")
+    fn is_readable(self) -> Bool:
+        return self.value & EPOLLIN != 0
+
+    @always_inline("nodebug")
+    fn is_writable(self) -> Bool:
+        return self.value & EPOLLOUT != 0
