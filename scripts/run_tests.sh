@@ -6,6 +6,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TESTS=(
     tests/io/_sys/linux/raw/test_ctypes.mojo
+    tests/io/_sys/linux/test_errno.mojo
 )
 
 cd "$PROJECT_DIR"
