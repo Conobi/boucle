@@ -43,7 +43,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue a no-op. Useful for testing and drain synchronisation."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (nop)"
         _ = Nop(sq.__next__()).user_data(token)
         self._pending += 1
 
@@ -58,7 +58,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue a read from `fd` into `buf`."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (read)"
         _ = Read(sq.__next__(), fd, buf, len).user_data(token).offset(offset)
         self._pending += 1
 
@@ -73,7 +73,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue a write from `buf` to `fd`."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (write)"
         _ = Write(sq.__next__(), fd, buf, len).user_data(token).offset(offset)
         self._pending += 1
 
@@ -87,7 +87,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue a recv from socket `fd` into `buf`."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (recv)"
         _ = Recv(sq.__next__(), fd, buf, len).user_data(token)
         self._pending += 1
 
@@ -101,7 +101,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue a send on socket `fd` from `buf`."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (send)"
         _ = Send(sq.__next__(), fd, buf, len).user_data(token)
         self._pending += 1
 
@@ -109,7 +109,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         """Queue an accept on listening socket `fd`."""
         var sq = self._ring.sq()
         if not sq:
-            raise "SQ full"
+            raise "submission queue full (accept)"
         _ = Accept(sq.__next__(), fd).user_data(token)
         self._pending += 1
 
