@@ -1,3 +1,5 @@
+from .qp import IoUring
+from .params import Params
 from .types import (
     IoUringSetupFlags,
     IoUringFeatureFlags,

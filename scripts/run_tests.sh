@@ -18,6 +18,7 @@ TESTS=(
     tests/boucle/net/test_addr.mojo
     tests/boucle/_sys/linux/test_mm.mojo
     tests/boucle/_sys/linux/io_uring/test_setup.mojo
+    tests/boucle/_sys/linux/io_uring/test_nop.mojo
     tests/boucle/_sys/linux/net/test_syscalls.mojo
     tests/boucle/net/test_socket.mojo
 )
