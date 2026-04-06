@@ -11,6 +11,7 @@ TESTS=(
     tests/io/test_handle.mojo
     tests/io/test_token.mojo
     tests/io/test_error.mojo
+    tests/io/test_buffer.mojo
 )
 
 cd "$PROJECT_DIR"
