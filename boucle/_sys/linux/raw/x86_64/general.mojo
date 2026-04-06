@@ -11,6 +11,9 @@ comptime __NR_bind = 49
 comptime __NR_listen = 50
 comptime __NR_setsockopt = 54
 comptime __NR_socketpair = 53
+comptime __NR_io_uring_setup = 425
+comptime __NR_io_uring_enter = 426
+comptime __NR_io_uring_register = 427
 
 # mmap constants
 comptime MAP_SHARED = 0x01
