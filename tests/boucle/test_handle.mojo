@@ -12,11 +12,10 @@ fn main() raises:
     var handle = OwnedHandle(raw=raw)
     assert_true(handle.raw() > -1)
 
-    var handle2 = handle
+    # Move semantics: transfer ownership from handle to handle2.
+    # handle is consumed; handle2 owns the fd and will auto-close on drop.
+    var handle2 = handle^
     assert_true(handle2.raw() > -1)
 
-    # Close the duped fd
-    var res = external_call["close", Int32](handle2.raw())
-    debug_assert(res == 0, "close failed")
-
+    # handle2 goes out of scope here and __del__ closes the fd automatically.
     print("All handle tests passed.")

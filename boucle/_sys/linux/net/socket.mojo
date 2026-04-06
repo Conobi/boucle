@@ -37,19 +37,19 @@ fn socket(
 
 
 @always_inline
-fn bind[Addr: SocketAddrStor](handle: OwnedHandle, ref addr: Addr) raises:
+fn bind[Addr: SocketAddrStor](ref handle: OwnedHandle, ref addr: Addr) raises:
     """Binds a socket to the given address (SocketAddrStor variant)."""
     var stor = addr.addr_stor()
     _bind(handle, stor)
 
 
 @always_inline
-fn bind[Addr: SocketAddr](handle: OwnedHandle, ref addr: Addr) raises:
+fn bind[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
     """Binds a socket to the given address (SocketAddr variant)."""
     _bind(handle, addr)
 
 
 @always_inline
-fn listen(handle: OwnedHandle, backlog: Backlog) raises:
+fn listen(ref handle: OwnedHandle, backlog: Backlog) raises:
     """Marks the socket as a passive socket for accepting connections."""
     _listen(handle, backlog)

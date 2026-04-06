@@ -1,14 +1,16 @@
 """Portable I/O resource handle types."""
 
-comptime RawHandle = Int32
+from boucle._sys.linux.fd import UnsafeFd, close, unsafe_fd_as_arg
+
+comptime RawHandle = UnsafeFd
 """A raw, unowned file descriptor / handle value. Alias for Int32."""
 
 
-struct OwnedHandle(TrivialRegisterPassable):
-    """An owned I/O resource handle.
+struct OwnedHandle(Movable):
+    """An owned I/O resource handle with RAII semantics.
 
-    Register-passable for efficient storage and passing. The caller must
-    explicitly close the handle via `close(unsafe_fd=handle.raw())` when done.
+    Automatically closes the underlying file descriptor on destruction.
+    Use `__moveinit__` to transfer ownership.
     """
 
     var _raw: RawHandle
@@ -19,7 +21,14 @@ struct OwnedHandle(TrivialRegisterPassable):
         self._raw = raw
 
     @always_inline("nodebug")
+    fn __moveinit__(out self, deinit take: Self):
+        self._raw = take._raw
+
+    @always_inline("nodebug")
+    fn __del__(deinit self):
+        close(unsafe_fd=self._raw)
+
+    @always_inline("nodebug")
     fn raw(self) -> RawHandle:
         """Returns the underlying raw handle value."""
-        debug_assert(self._raw > -1, "invalid handle")
-        return self._raw
+        return unsafe_fd_as_arg(self._raw)

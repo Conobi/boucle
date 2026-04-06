@@ -27,8 +27,8 @@ struct Socket:
     var _handle: OwnedHandle
 
     @always_inline
-    fn __init__(out self, handle: OwnedHandle):
-        self._handle = handle
+    fn __init__(out self, var handle: OwnedHandle):
+        self._handle = handle^
 
     @staticmethod
     fn tcp_v4() raises -> Self:

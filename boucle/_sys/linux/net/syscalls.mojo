@@ -29,7 +29,7 @@ fn _socket(
 
 
 @always_inline
-fn _bind[Addr: SocketAddr](handle: OwnedHandle, ref addr: Addr) raises:
+fn _bind[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
     var res = external_call["bind", Int32](
         handle.raw(), addr.addr_unsafe_ptr(), Int32(Addr.ADDR_LEN)
     )
@@ -38,7 +38,7 @@ fn _bind[Addr: SocketAddr](handle: OwnedHandle, ref addr: Addr) raises:
 
 
 @always_inline
-fn _listen(handle: OwnedHandle, backlog: Backlog) raises:
+fn _listen(ref handle: OwnedHandle, backlog: Backlog) raises:
     var res = external_call["listen", Int32](handle.raw(), backlog.value)
     if res < 0:
         raise String(Int(res))
