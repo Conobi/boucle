@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TESTS=(
-    # Will be populated as tests are added
+    tests/io/_sys/linux/raw/test_ctypes.mojo
 )
 
 cd "$PROJECT_DIR"

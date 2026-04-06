@@ -12,5 +12,12 @@ rm -f *.mojopkg
 echo "Building io..."
 mojo package io -o io.mojopkg
 
+# Workaround: Mojo 0.26.2 implicit stdlib imports shadow `io` with `std.io`.
+# Build under the `boucle` name so tests and external consumers can import.
+# When implicit stdlib imports are removed in a future Mojo release, this
+# line can be dropped and consumers can `from io...` directly.
+echo "Building boucle (test alias)..."
+mojo package io -o boucle.mojopkg
+
 echo "All packages built."
 ls -lh *.mojopkg
