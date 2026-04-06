@@ -10,6 +10,7 @@ TESTS=(
     tests/io/_sys/linux/test_fd.mojo
     tests/io/test_handle.mojo
     tests/io/test_token.mojo
+    tests/io/test_error.mojo
 )
 
 cd "$PROJECT_DIR"
