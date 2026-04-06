@@ -1,4 +1,4 @@
-from io._sys.linux.raw.ctypes import c_int, c_long, c_ulong, c_longlong
+from boucle._sys.linux.raw.ctypes import c_int, c_long, c_ulong, c_longlong
 
 # Syscall numbers (x86_64)
 comptime __NR_close = 3
@@ -40,3 +40,7 @@ struct __kernel_timespec(TrivialRegisterPassable):
 
 # Signal set (simple alias on x86_64 Linux)
 comptime sigset_t = c_ulong
+
+# File descriptor flags
+comptime O_NONBLOCK = 2048
+comptime O_CLOEXEC = 524288

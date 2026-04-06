@@ -5,13 +5,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 TESTS=(
-    tests/io/_sys/linux/raw/test_ctypes.mojo
-    tests/io/_sys/linux/test_errno.mojo
-    tests/io/_sys/linux/test_fd.mojo
-    tests/io/test_handle.mojo
-    tests/io/test_token.mojo
-    tests/io/test_error.mojo
-    tests/io/test_buffer.mojo
+    tests/boucle/_sys/linux/raw/test_ctypes.mojo
+    tests/boucle/_sys/linux/test_errno.mojo
+    tests/boucle/_sys/linux/test_fd.mojo
+    tests/boucle/test_handle.mojo
+    tests/boucle/test_token.mojo
+    tests/boucle/test_error.mojo
+    tests/boucle/test_buffer.mojo
 )
 
 cd "$PROJECT_DIR"

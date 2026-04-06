@@ -1,0 +1,213 @@
+"""Portable socket option enumerations.
+
+Wraps platform-specific constants behind typed structs so user code
+does not import raw kernel values directly.
+
+Constants are defined as literals rather than importing from
+io._sys.linux.raw to avoid a Mojo 0.26.2 mojopkg deserialization
+crash when importing across multiple internal subpackages.
+"""
+
+
+struct SocketType(TrivialRegisterPassable):
+    """`SOCK_*` constants for use with `socket`."""
+
+    comptime STREAM = Self(unsafe_id=1)    # SOCK_STREAM
+    comptime DGRAM = Self(unsafe_id=2)     # SOCK_DGRAM
+    comptime SEQPACKET = Self(unsafe_id=5) # SOCK_SEQPACKET
+    comptime RAW = Self(unsafe_id=3)       # SOCK_RAW
+    comptime RDM = Self(unsafe_id=4)       # SOCK_RDM
+
+    var id: Int32
+
+    @always_inline("nodebug")
+    fn __init__(out self, *, unsafe_id: Int32):
+        self.id = unsafe_id
+
+
+struct SocketFlags(TrivialRegisterPassable, Defaultable):
+    """`SOCK_*` constants for use with `socket`."""
+
+    comptime NONBLOCK = Self(2048)    # O_NONBLOCK
+    comptime CLOEXEC = Self(524288)   # O_CLOEXEC
+
+    var value: UInt32
+
+    @always_inline("nodebug")
+    fn __init__(out self):
+        self.value = 0
+
+    @always_inline("nodebug")
+    @implicit
+    fn __init__(out self, value: UInt32):
+        self.value = value
+
+    @always_inline("nodebug")
+    fn __or__(self, rhs: Self) -> Self:
+        """Returns `self | rhs`.
+
+        Args:
+            rhs: The RHS value.
+
+        Returns:
+            `self | rhs`.
+        """
+        return self.value | rhs.value
+
+
+struct AddrFamily(TrivialRegisterPassable):
+    """`AF_*` constants for use with `socket`."""
+
+    comptime UNSPEC = Self(unsafe_id=0)   # AF_UNSPEC
+    comptime UNIX = Self(unsafe_id=1)     # AF_UNIX
+    comptime INET = Self(unsafe_id=2)     # AF_INET
+    comptime INET6 = Self(unsafe_id=10)   # AF_INET6
+    comptime NETLINK = Self(unsafe_id=16) # AF_NETLINK
+
+    var id: UInt16  # __kernel_sa_family_t
+
+    @always_inline("nodebug")
+    fn __init__(out self, *, unsafe_id: UInt16):
+        self.id = unsafe_id
+
+
+struct Protocol(TrivialRegisterPassable, Defaultable):
+    """`IPPROTO_*` and other constants for use with `socket`."""
+
+    comptime IP = Self(unsafe_id=0)
+    comptime ICMP = Self(unsafe_id=1)
+    comptime IGMP = Self(unsafe_id=2)
+    comptime IPIP = Self(unsafe_id=4)
+    comptime TCP = Self(unsafe_id=6)
+    comptime EGP = Self(unsafe_id=8)
+    comptime PUP = Self(unsafe_id=12)
+    comptime UDP = Self(unsafe_id=17)
+    comptime IDP = Self(unsafe_id=22)
+    comptime TP = Self(unsafe_id=29)
+    comptime DCCP = Self(unsafe_id=33)
+    comptime IPV6 = Self(unsafe_id=41)
+    comptime RSVP = Self(unsafe_id=46)
+    comptime GRE = Self(unsafe_id=47)
+    comptime ESP = Self(unsafe_id=50)
+    comptime AH = Self(unsafe_id=51)
+    comptime MTP = Self(unsafe_id=92)
+    comptime BEETPH = Self(unsafe_id=94)
+    comptime ENCAP = Self(unsafe_id=98)
+    comptime PIM = Self(unsafe_id=103)
+    comptime COMP = Self(unsafe_id=108)
+    comptime SCTP = Self(unsafe_id=132)
+    comptime UDPLITE = Self(unsafe_id=136)
+    comptime MPLS = Self(unsafe_id=137)
+    comptime ETHERNET = Self(unsafe_id=143)
+    comptime RAW = Self(unsafe_id=255)
+    comptime MPTCP = Self(unsafe_id=262)
+    comptime FRAGMENT = Self(unsafe_id=44)
+    comptime ICMPV6 = Self(unsafe_id=58)
+    comptime MH = Self(unsafe_id=135)
+    comptime ROUTING = Self(unsafe_id=43)
+
+    var id: UInt32
+
+    @always_inline("nodebug")
+    fn __init__(out self):
+        self = Self(unsafe_id=0)  # IPPROTO_IP
+
+    @always_inline("nodebug")
+    fn __init__(out self, *, unsafe_id: UInt32):
+        self.id = unsafe_id
+
+
+struct SendFlags(TrivialRegisterPassable, Defaultable):
+    """`MSG_*` flags for use with `send`, `send_to`, and related functions."""
+
+    comptime CONFIRM = Self(2048)      # MSG_CONFIRM
+    comptime DONTROUTE = Self(4)       # MSG_DONTROUTE
+    comptime DONTWAIT = Self(64)       # MSG_DONTWAIT
+    comptime EOR = Self(128)           # MSG_EOR
+    comptime MORE = Self(32768)        # MSG_MORE
+    comptime NOSIGNAL = Self(16384)    # MSG_NOSIGNAL
+    comptime OOB = Self(1)             # MSG_OOB
+
+    var value: UInt32
+
+    @always_inline("nodebug")
+    fn __init__(out self):
+        self.value = 0
+
+    @always_inline("nodebug")
+    @implicit
+    fn __init__(out self, value: UInt32):
+        self.value = value
+
+    @always_inline("nodebug")
+    fn __or__(self, rhs: Self) -> Self:
+        """Returns `self | rhs`.
+
+        Args:
+            rhs: The RHS value.
+
+        Returns:
+            `self | rhs`.
+        """
+        return self.value | rhs.value
+
+
+struct RecvFlags(TrivialRegisterPassable, Defaultable):
+    """`MSG_*` flags for use with `recv`, `recvfrom`, and related functions."""
+
+    comptime CMSG_CLOEXEC = Self(1073741824) # MSG_CMSG_CLOEXEC
+    comptime DONTWAIT = Self(64)             # MSG_DONTWAIT
+    comptime ERRQUEUE = Self(8192)           # MSG_ERRQUEUE
+    comptime OOB = Self(1)                   # MSG_OOB
+    comptime PEEK = Self(2)                  # MSG_PEEK
+    comptime TRUNC = Self(32)                # MSG_TRUNC
+    comptime WAITALL = Self(256)             # MSG_WAITALL
+
+    var value: UInt32
+
+    @always_inline("nodebug")
+    fn __init__(out self):
+        self.value = 0
+
+    @always_inline("nodebug")
+    @implicit
+    fn __init__(out self, value: UInt32):
+        self.value = value
+
+    @always_inline("nodebug")
+    fn __or__(self, rhs: Self) -> Self:
+        """Returns `self | rhs`.
+
+        Args:
+            rhs: The RHS value.
+
+        Returns:
+            `self | rhs`.
+        """
+        return self.value | rhs.value
+
+
+struct Backlog(TrivialRegisterPassable):
+    """Listen backlog values."""
+
+    comptime DEFAULT = Self(128)
+
+    var value: Int32
+
+    @always_inline("nodebug")
+    fn __init__(out self, value: Int32):
+        self.value = value
+
+
+struct Shutdown(TrivialRegisterPassable):
+    """`SHUT_*` constants for use with `shutdown`."""
+
+    comptime RD = Self(0)     # SHUT_RD
+    comptime WR = Self(1)     # SHUT_WR
+    comptime RDWR = Self(2)   # SHUT_RDWR
+
+    var value: Int32
+
+    @always_inline("nodebug")
+    fn __init__(out self, value: Int32):
+        self.value = value

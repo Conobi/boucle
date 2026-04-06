@@ -1,4 +1,4 @@
-from io._sys.linux.raw.x86_64.errno import (
+from boucle._sys.linux.raw.x86_64.errno import (
     EACCES,
     EADDRINUSE,
     EADDRNOTAVAIL,
