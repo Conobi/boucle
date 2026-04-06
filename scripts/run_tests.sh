@@ -20,6 +20,7 @@ TESTS=(
     tests/boucle/_sys/linux/io_uring/test_setup.mojo
     tests/boucle/_sys/linux/io_uring/test_nop.mojo
     tests/boucle/_sys/linux/io_uring/test_ops.mojo
+    tests/boucle/_sys/linux/epoll/test_epoll.mojo
     tests/boucle/_sys/linux/net/test_syscalls.mojo
     tests/boucle/net/test_socket.mojo
     tests/boucle/test_completion.mojo
