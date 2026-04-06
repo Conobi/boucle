@@ -1,43 +1,45 @@
 """Portable I/O error type."""
 
+from boucle._sys.linux.errno import Errno
 
-struct IOError(TrivialRegisterPassable, Writable):
-    """Portable I/O error type wrapping a negated errno value."""
 
-    var _id: Int16
+struct IOError(Writable):
+    """Portable I/O error type wrapping a Linux errno."""
+
+    var _errno: Errno
 
     @always_inline("nodebug")
-    fn __init__(out self, *, negated_errno: Int16):
-        debug_assert(
-            negated_errno >= -4095 and negated_errno < 0,
-            "error number out of range",
-        )
-        self._id = negated_errno
+    fn __init__(out self, errno: Errno):
+        self._errno = errno
 
+    @always_inline("nodebug")
+    fn __init__(out self, *, error: Error) raises:
+        self._errno = Errno(error=error)
+
+    @always_inline("nodebug")
     fn is_would_block(self) -> Bool:
-        # EAGAIN = 11 = EWOULDBLOCK on Linux x86_64
-        return self._id == -11
+        return self._errno is Errno.EAGAIN or self._errno is Errno.EWOULDBLOCK
 
+    @always_inline("nodebug")
     fn is_connection_reset(self) -> Bool:
-        # ECONNRESET = 104
-        return self._id == -104
+        return self._errno is Errno.ECONNRESET
 
+    @always_inline("nodebug")
     fn is_connection_refused(self) -> Bool:
-        # ECONNREFUSED = 111
-        return self._id == -111
+        return self._errno is Errno.ECONNREFUSED
 
+    @always_inline("nodebug")
     fn is_broken_pipe(self) -> Bool:
-        # EPIPE = 32
-        return self._id == -32
+        return self._errno is Errno.EPIPE
 
+    @always_inline("nodebug")
     fn is_timed_out(self) -> Bool:
-        # ETIMEDOUT = 110
-        return self._id == -110
+        return self._errno is Errno.ETIMEDOUT
 
+    @always_inline("nodebug")
     fn is_interrupted(self) -> Bool:
-        # EINTR = 4
-        return self._id == -4
+        return self._errno is Errno.EINTR
 
     @always_inline
     fn write_to[W: Writer](self, mut writer: W):
-        writer.write("IOError(errno=", self._id, ")")
+        writer.write("IOError(errno=", self._errno, ")")
