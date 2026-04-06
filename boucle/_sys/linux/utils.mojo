@@ -31,3 +31,15 @@ fn _align_eq[T: AnyType, I: AnyType]():
 fn _align_eq[T: AnyType, align: IntLiteral]():
     """Compile-time assertion that a type has the given alignment."""
     constrained[align_of[T]() == align]()
+
+
+@always_inline("nodebug")
+fn _size_eq[T: AnyType](size: Int):
+    """Runtime assertion that a type has the given size."""
+    debug_assert(size_of[T]() == size, "size mismatch")
+
+
+@always_inline("nodebug")
+fn _align_eq[T: AnyType](align: Int):
+    """Runtime assertion that a type has the given alignment."""
+    debug_assert(align_of[T]() == align, "alignment mismatch")
