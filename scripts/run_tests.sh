@@ -12,6 +12,7 @@ TESTS=(
     tests/boucle/test_token.mojo
     tests/boucle/test_error.mojo
     tests/boucle/test_buffer.mojo
+    tests/boucle/net/test_ip.mojo
 )
 
 cd "$PROJECT_DIR"
