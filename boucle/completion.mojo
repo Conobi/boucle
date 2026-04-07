@@ -12,7 +12,7 @@ See `boucle.readiness` for the alternative model.
 """
 
 from boucle._sys.linux.io_uring import IoUring
-from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept
+from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
 
@@ -111,6 +111,26 @@ struct CompletionLoop[Handler: CompletionHandler]:
         if not sq:
             raise "submission queue full (accept)"
         _ = Accept(sq.__next__(), fd).user_data(token)
+        self._pending += 1
+
+    fn submit_connect(
+        mut self,
+        fd: RawHandle,
+        addr_unsafe_ptr: UnsafePointer[Int8, StaticConstantOrigin],
+        addr_len: UInt64,
+        token: UInt64,
+    ) raises:
+        """Queue a connect on socket `fd` to the given address.
+
+        The memory pointed to by `addr_unsafe_ptr` must remain valid
+        until the completion fires.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (connect)"
+        _ = Connect(sq.__next__(), fd, addr_unsafe_ptr, addr_len).user_data(
+            token
+        )
         self._pending += 1
 
     fn poll(mut self, *, wait_nr: UInt32 = 1) raises:
