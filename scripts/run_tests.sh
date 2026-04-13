@@ -17,6 +17,7 @@ TESTS=(
     tests/boucle/net/test_ip.mojo
     tests/boucle/net/test_addr.mojo
     tests/boucle/_sys/linux/test_mm.mojo
+    tests/boucle/_sys/linux/test_ucontext.mojo
     tests/boucle/_sys/linux/io_uring/test_setup.mojo
     tests/boucle/_sys/linux/io_uring/test_nop.mojo
     tests/boucle/_sys/linux/io_uring/test_ops.mojo
@@ -29,6 +30,8 @@ TESTS=(
     tests/boucle/test_interest.mojo
     tests/boucle/test_readiness_state.mojo
     tests/boucle/test_readiness.mojo
+    tests/boucle/test_stackful.mojo
+    tests/boucle/test_stackful_io.mojo
 )
 
 cd "$PROJECT_DIR"

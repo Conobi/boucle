@@ -53,6 +53,7 @@ from boucle._sys.linux.raw.x86_64.general import (
 )
 from boucle._sys.linux.raw.x86_64.syscall import syscall
 from boucle._sys.linux.raw.utils import is_64bit
+from ffi import external_call
 from memory import UnsafePointer
 
 
@@ -176,6 +177,26 @@ fn madvise(
     """
     var res = syscall[__NR_madvise, Scalar[DType.int64]](unsafe_ptr, len, advice)
     unsafe_decode_none(res)
+
+
+@always_inline
+fn mprotect(
+    *, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt, prot: ProtFlags
+) raises:
+    """Changes the access protections for a memory region.
+    [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html.
+
+    Args:
+        unsafe_ptr: Start of the memory region (must be page-aligned).
+        len: Length of the region.
+        prot: New protection flags.
+
+    Raises:
+        If the syscall returned an error.
+    """
+    var res = external_call["mprotect", Int32](unsafe_ptr, len, prot.value)
+    if res != 0:
+        raise "mprotect failed"
 
 
 struct MapFlags(TrivialRegisterPassable, Defaultable):
