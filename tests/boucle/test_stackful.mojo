@@ -182,6 +182,99 @@ fn test_error_after_yield() raises:
     assert_true(coro.is_done())
 
 
+fn test_move_handle() raises:
+    """CoroHandle move preserves stable _CoroInner address — resume works after move."""
+    var state = _CounterState(0)
+    var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
+        unsafe_from_address=Int(UnsafePointer(to=state))
+    )
+    var coro = CoroHandle(_multiple_yields_body, user_data=state_ptr)
+    coro.resume()
+    assert_equal(state.counter, 1)
+    # Move into a new variable
+    var moved = coro^
+    moved.resume()
+    assert_equal(state.counter, 2)
+    moved.resume()
+    assert_equal(state.counter, 3)
+    # Run to completion via the moved handle
+    moved.resume()
+    moved.resume()
+    moved.resume()
+    assert_true(moved.is_done())
+    assert_equal(state.counter, 5)
+
+
+fn _alternation_body(mut y: CoroYielder) raises:
+    var state = y.user_data().bitcast[_CounterState]()
+    state[].counter += 1
+    y.yield_to_caller()
+    state[].counter += 1
+    y.yield_to_caller()
+    state[].counter += 1
+
+
+fn test_multiple_live_coros() raises:
+    """Multiple live coroutines resumed in alternation — the event loop pattern."""
+    var state_a = _CounterState(0)
+    var state_b = _CounterState(0)
+    var state_c = _CounterState(0)
+    var ptr_a = UnsafePointer[NoneType, MutExternalOrigin](
+        unsafe_from_address=Int(UnsafePointer(to=state_a))
+    )
+    var ptr_b = UnsafePointer[NoneType, MutExternalOrigin](
+        unsafe_from_address=Int(UnsafePointer(to=state_b))
+    )
+    var ptr_c = UnsafePointer[NoneType, MutExternalOrigin](
+        unsafe_from_address=Int(UnsafePointer(to=state_c))
+    )
+    var coro_a = CoroHandle(_alternation_body, user_data=ptr_a)
+    var coro_b = CoroHandle(_alternation_body, user_data=ptr_b)
+    var coro_c = CoroHandle(_alternation_body, user_data=ptr_c)
+
+    # Round 1: resume all — each increments to 1 and yields
+    coro_a.resume()
+    coro_b.resume()
+    coro_c.resume()
+    assert_equal(state_a.counter, 1)
+    assert_equal(state_b.counter, 1)
+    assert_equal(state_c.counter, 1)
+
+    # Round 2: resume in different order
+    coro_c.resume()
+    coro_a.resume()
+    coro_b.resume()
+    assert_equal(state_a.counter, 2)
+    assert_equal(state_b.counter, 2)
+    assert_equal(state_c.counter, 2)
+
+    # Round 3: all run to completion
+    coro_b.resume()
+    coro_c.resume()
+    coro_a.resume()
+    assert_equal(state_a.counter, 3)
+    assert_equal(state_b.counter, 3)
+    assert_equal(state_c.counter, 3)
+    assert_true(coro_a.is_done())
+    assert_true(coro_b.is_done())
+    assert_true(coro_c.is_done())
+
+
+fn test_custom_stack_size() raises:
+    """Custom stack_size parameter works (smaller than default)."""
+    var state = _RunToCompletionState(0)
+    var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
+        unsafe_from_address=Int(UnsafePointer(to=state))
+    )
+    # 16KB stack — well above what these trivial bodies need
+    var coro = CoroHandle(
+        _run_to_completion_body, user_data=state_ptr, stack_size=16384
+    )
+    coro.resume()
+    assert_equal(state.value, 42)
+    assert_true(coro.is_done())
+
+
 fn main() raises:
     test_create_destroy()
     test_single_yield()
@@ -190,4 +283,7 @@ fn main() raises:
     test_shared_state()
     test_error_propagation()
     test_error_after_yield()
+    test_move_handle()
+    test_multiple_live_coros()
+    test_custom_stack_size()
     print("All stackful tests passed.")

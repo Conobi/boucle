@@ -2,6 +2,7 @@ from boucle._sys.linux.raw.ctypes import c_uint, c_void
 from boucle._sys.linux.errno import unsafe_decode_ptr, unsafe_decode_none
 from boucle._sys.linux.raw.x86_64.general import (
     __NR_mmap,
+    __NR_mprotect,
     __NR_munmap,
     __NR_madvise,
     MAP_SHARED,
@@ -53,7 +54,6 @@ from boucle._sys.linux.raw.x86_64.general import (
 )
 from boucle._sys.linux.raw.x86_64.syscall import syscall
 from boucle._sys.linux.raw.utils import is_64bit
-from ffi import external_call
 from memory import UnsafePointer
 
 
@@ -194,9 +194,8 @@ fn mprotect(
     Raises:
         If the syscall returned an error.
     """
-    var res = external_call["mprotect", Int32](unsafe_ptr, len, prot.value)
-    if res != 0:
-        raise "mprotect failed"
+    var res = syscall[__NR_mprotect, Scalar[DType.int64]](unsafe_ptr, len, prot)
+    unsafe_decode_none(res)
 
 
 struct MapFlags(TrivialRegisterPassable, Defaultable):

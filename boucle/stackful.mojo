@@ -63,6 +63,10 @@ struct CoroYielder:
         Execution resumes from here when the caller calls resume().
         """
         self._inner[].phase = CORO_SUSPENDED
+        # Unchecked: yield can't raise (no way to propagate from here),
+        # and swapcontext only fails with invalid pointers — which would
+        # mean _CoroInner is already corrupt. Checking would add overhead
+        # on every yield for a condition that indicates unrecoverable state.
         uc_swapcontext_unchecked(
             self._inner[].coro_ctx, self._inner[].caller_ctx
         )
@@ -226,8 +230,9 @@ struct CoroHandle(Movable):
 
     fn __del__(deinit self):
         debug_assert(
-            self._inner[].phase != CORO_SUSPENDED,
-            "destroying a SUSPENDED coroutine -- body will never finish",
+            self._inner[].phase == CORO_CREATED
+            or self._inner[].phase == CORO_DONE,
+            "destroying a coroutine that hasn't finished",
         )
         # Free ucontext buffers
         free_ucontext(self._inner[].caller_ctx)
