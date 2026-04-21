@@ -12,7 +12,8 @@ See `boucle.readiness` for the alternative model.
 """
 
 from boucle._sys.linux.io_uring import IoUring
-from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect
+from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg
+from boucle._sys.linux.raw.ctypes import c_void
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
 
@@ -129,6 +130,46 @@ struct CompletionLoop[Handler: CompletionHandler]:
         if not sq:
             raise "submission queue full (connect)"
         _ = Connect(sq.__next__(), fd, addr_unsafe_ptr, addr_len).user_data(
+            token
+        )
+        self._pending += 1
+
+    fn submit_recvmsg(
+        mut self,
+        fd: RawHandle,
+        msghdr_ptr: UnsafePointer[c_void, StaticConstantOrigin],
+        token: UInt64,
+        flags: UInt32 = 0,
+    ) raises:
+        """Queue a recvmsg on socket `fd`.
+
+        The memory pointed to by `msghdr_ptr` (and all buffers it
+        references) must remain valid until the completion fires.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (recvmsg)"
+        _ = RecvMsg(sq.__next__(), fd, msghdr_ptr).recv_flags(flags).user_data(
+            token
+        )
+        self._pending += 1
+
+    fn submit_sendmsg(
+        mut self,
+        fd: RawHandle,
+        msghdr_ptr: UnsafePointer[c_void, StaticConstantOrigin],
+        token: UInt64,
+        flags: UInt32 = 0,
+    ) raises:
+        """Queue a sendmsg on socket `fd`.
+
+        The memory pointed to by `msghdr_ptr` (and all buffers it
+        references) must remain valid until the completion fires.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (sendmsg)"
+        _ = SendMsg(sq.__next__(), fd, msghdr_ptr).send_flags(flags).user_data(
             token
         )
         self._pending += 1
