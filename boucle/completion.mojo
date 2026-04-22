@@ -114,6 +114,19 @@ struct CompletionLoop[Handler: CompletionHandler]:
         _ = Accept(sq.__next__(), fd).user_data(token)
         self._pending += 1
 
+    fn submit_accept_multishot(mut self, fd: RawHandle, token: UInt64) raises:
+        """Queue a multishot accept on listening socket `fd`.
+
+        Produces one CQE per accepted connection. Re-submit only when
+        CQE flags lack IORING_CQE_F_MORE (multishot ended).
+        Requires kernel >= 5.19.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (accept_multishot)"
+        _ = Accept(sq.__next__(), fd).ioprio(1).user_data(token)
+        self._pending += 1
+
     fn submit_connect(
         mut self,
         fd: RawHandle,
