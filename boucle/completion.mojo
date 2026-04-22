@@ -13,6 +13,7 @@ See `boucle.readiness` for the alternative model.
 
 from boucle._sys.linux.io_uring import IoUring
 from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout
+from boucle._sys.linux.io_uring.types import IoUringAcceptFlags
 from boucle._sys.linux.raw.ctypes import c_void
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
@@ -124,7 +125,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         var sq = self._ring.sq()
         if not sq:
             raise "submission queue full (accept_multishot)"
-        _ = Accept(sq.__next__(), fd).ioprio(1).user_data(token)
+        _ = Accept(sq.__next__(), fd).ioprio(IoUringAcceptFlags.MULTISHOT.value).user_data(token)
         self._pending += 1
 
     fn submit_connect(
