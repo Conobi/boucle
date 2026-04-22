@@ -612,3 +612,48 @@ struct Connect[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
     fn sqe_flags(var self, flags: IoUringSqeFlags) -> Self:
         self.sqe[].flags |= flags
         return self^
+
+
+struct Timeout[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
+    """Schedule a timeout, equivalent to a kernel timer.
+
+    The `addr` field points to a `kernel_timespec` (16 bytes: tv_sec i64 + tv_nsec i64).
+    The `off` field is the completion event count (0 = pure timer).
+    CQE result: -ETIME on normal expiry, 0 if canceled.
+    """
+
+    comptime SINCE = 5.4
+
+    var sqe: Pointer[Sqe[Self.type], Self.origin]
+
+    @always_inline
+    fn __init__(
+        out self,
+        ref [Self.origin]sqe: Sqe[Self.type],
+        ts_ptr: UnsafePointer[c_void, StaticConstantOrigin],
+        count: UInt64 = 0,
+    ):
+        _prep_rw(
+            sqe,
+            IoUringOp.TIMEOUT,
+            IoUringFd[False](unsafe_fd=NoFd),
+            UInt64(Int(ts_ptr)),
+            UInt32(1),  # len = 1 (number of timespec entries)
+        )
+        sqe.off_or_addr2_or_cmd_op = count
+        self.sqe = Pointer(to=sqe)
+
+    @always_inline("nodebug")
+    fn user_data(var self, value: UInt64) -> Self:
+        self.sqe[].user_data = value
+        return self^
+
+    @always_inline("nodebug")
+    fn personality(var self, value: UInt16) -> Self:
+        self.sqe[].personality = value
+        return self^
+
+    @always_inline("nodebug")
+    fn sqe_flags(var self, flags: IoUringSqeFlags) -> Self:
+        self.sqe[].flags |= flags
+        return self^

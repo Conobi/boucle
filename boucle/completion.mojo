@@ -12,7 +12,7 @@ See `boucle.readiness` for the alternative model.
 """
 
 from boucle._sys.linux.io_uring import IoUring
-from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg
+from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout
 from boucle._sys.linux.raw.ctypes import c_void
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
@@ -172,6 +172,23 @@ struct CompletionLoop[Handler: CompletionHandler]:
         _ = SendMsg(sq.__next__(), fd, msghdr_ptr).send_flags(flags).user_data(
             token
         )
+        self._pending += 1
+
+    fn submit_timeout(
+        mut self,
+        ts_ptr: UnsafePointer[c_void, StaticConstantOrigin],
+        token: UInt64,
+    ) raises:
+        """Queue a timeout. `ts_ptr` points to a 16-byte kernel_timespec.
+
+        CQE result is -ETIME on normal expiry, 0 if canceled.
+        The memory pointed to by `ts_ptr` must remain valid until
+        the completion fires.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (timeout)"
+        _ = Timeout(sq.__next__(), ts_ptr).user_data(token)
         self._pending += 1
 
     fn poll(mut self, *, wait_nr: UInt32 = 1) raises:
