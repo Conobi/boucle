@@ -559,6 +559,11 @@ struct Accept[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
         self.sqe[].op_flags = flags
         return self^
 
+    @always_inline("nodebug")
+    fn ioprio(var self, value: UInt16) -> Self:
+        self.sqe[].ioprio = value
+        return self^
+
 
 struct Connect[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
     """Connect a socket, equivalent to `connect(2)`."""
