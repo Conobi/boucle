@@ -699,12 +699,12 @@ struct ProvideBuffers[type: SQE, origin: MutOrigin](RegisterPassable, Operation)
         sqe.flags = IoUringSqeFlags()
         sqe.ioprio = 0
         sqe.fd = Int32(count)
-        sqe.off_or_addr2_or_cmd_op = UInt64(UInt32(group_id) << 16 | UInt32(base_buf_id))
+        sqe.off_or_addr2_or_cmd_op = UInt64(base_buf_id)
         sqe.addr_or_splice_off_in_or_msgring_cmd = UInt64(Int(buf_base))
         sqe.len_or_poll_flags = buf_size
         sqe.op_flags = 0
         sqe.user_data = 0
-        sqe.buf_index_or_buf_group = 0
+        sqe.buf_index_or_buf_group = group_id
         sqe.personality = 0
         sqe.splice_fd_in_or_file_index_or_optlen_or_addr_len = 0
         sqe.addr3_or_optval_or_cmd = addr3_struct()
@@ -713,6 +713,11 @@ struct ProvideBuffers[type: SQE, origin: MutOrigin](RegisterPassable, Operation)
     @always_inline("nodebug")
     fn user_data(var self, value: UInt64) -> Self:
         self.sqe[].user_data = value
+        return self^
+
+    @always_inline("nodebug")
+    fn personality(var self, value: UInt16) -> Self:
+        self.sqe[].personality = value
         return self^
 
     @always_inline("nodebug")
