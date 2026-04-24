@@ -364,6 +364,16 @@ struct RecvMsg[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
         self.sqe[].op_flags = flags
         return self^
 
+    @always_inline("nodebug")
+    fn ioprio(var self, value: UInt16) -> Self:
+        self.sqe[].ioprio = value
+        return self^
+
+    @always_inline("nodebug")
+    fn buf_group(var self, value: UInt16) -> Self:
+        self.sqe[].buf_index_or_buf_group = value
+        return self^
+
 
 struct SendMsg[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
     """Send a message on a socket, equivalent to `sendmsg(2)`."""
@@ -656,6 +666,53 @@ struct Timeout[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
     @always_inline("nodebug")
     fn personality(var self, value: UInt16) -> Self:
         self.sqe[].personality = value
+        return self^
+
+    @always_inline("nodebug")
+    fn sqe_flags(var self, flags: IoUringSqeFlags) -> Self:
+        self.sqe[].flags |= flags
+        return self^
+
+
+struct ProvideBuffers[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
+    """Provide buffers to io_uring for kernel-side buffer selection.
+
+    Used with multishot recvmsg: the kernel picks a buffer from the
+    provided pool for each received message.  Requires kernel >= 5.19.
+    """
+
+    comptime SINCE = 5.19
+
+    var sqe: Pointer[Sqe[Self.type], Self.origin]
+
+    @always_inline
+    fn __init__(
+        out self,
+        ref [Self.origin]sqe: Sqe[Self.type],
+        buf_base: UnsafePointer[c_void, StaticConstantOrigin],
+        buf_size: UInt32,
+        count: UInt32,
+        group_id: UInt16,
+        base_buf_id: UInt16,
+    ):
+        sqe.opcode = IoUringOp.PROVIDE_BUFFERS
+        sqe.flags = IoUringSqeFlags()
+        sqe.ioprio = 0
+        sqe.fd = Int32(count)
+        sqe.off_or_addr2_or_cmd_op = UInt64(UInt32(group_id) << 16 | UInt32(base_buf_id))
+        sqe.addr_or_splice_off_in_or_msgring_cmd = UInt64(Int(buf_base))
+        sqe.len_or_poll_flags = buf_size
+        sqe.op_flags = 0
+        sqe.user_data = 0
+        sqe.buf_index_or_buf_group = 0
+        sqe.personality = 0
+        sqe.splice_fd_in_or_file_index_or_optlen_or_addr_len = 0
+        sqe.addr3_or_optval_or_cmd = addr3_struct()
+        self.sqe = Pointer(to=sqe)
+
+    @always_inline("nodebug")
+    fn user_data(var self, value: UInt64) -> Self:
+        self.sqe[].user_data = value
         return self^
 
     @always_inline("nodebug")
