@@ -12,9 +12,10 @@ See `boucle.readiness` for the alternative model.
 """
 
 from boucle._sys.linux.io_uring import IoUring
-from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout
-from boucle._sys.linux.io_uring.types import IoUringAcceptFlags
+from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout, ProvideBuffers
+from boucle._sys.linux.io_uring.types import IoUringAcceptFlags, IoUringSqeFlags
 from boucle._sys.linux.raw.ctypes import c_void
+from boucle._sys.linux.raw.x86_64.io_uring import IORING_RECV_MULTISHOT
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
 
@@ -203,6 +204,82 @@ struct CompletionLoop[Handler: CompletionHandler]:
         if not sq:
             raise "submission queue full (timeout)"
         _ = Timeout(sq.__next__(), ts_ptr).user_data(token)
+        self._pending += 1
+
+    fn provide_buffers(
+        mut self,
+        buf_base: UnsafePointer[UInt8, MutAnyOrigin],
+        buf_size: Int,
+        count: Int,
+        group_id: UInt16,
+        base_buf_id: UInt16,
+    ) raises:
+        """Register count contiguous buffers with io_uring.
+
+        Buffers are contiguous: buf_base[i * buf_size .. (i+1) * buf_size].
+        Each buffer gets ID base_buf_id + i.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (provide_buffers)"
+        var buf_ptr = UnsafePointer[c_void, StaticConstantOrigin](
+            unsafe_from_address=Int(buf_base)
+        )
+        _ = ProvideBuffers(
+            sq.__next__(),
+            buf_ptr,
+            UInt32(buf_size),
+            UInt32(count),
+            group_id,
+            base_buf_id,
+        )
+        self._pending += 1
+
+    fn reprovide_buffer(
+        mut self,
+        buf_ptr: UnsafePointer[UInt8, MutAnyOrigin],
+        buf_size: Int,
+        group_id: UInt16,
+        buf_id: UInt16,
+    ) raises:
+        """Re-provide a single buffer after processing its data."""
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (reprovide_buffer)"
+        var ptr = UnsafePointer[c_void, StaticConstantOrigin](
+            unsafe_from_address=Int(buf_ptr)
+        )
+        _ = ProvideBuffers(
+            sq.__next__(),
+            ptr,
+            UInt32(buf_size),
+            UInt32(1),
+            group_id,
+            buf_id,
+        )
+        self._pending += 1
+
+    fn submit_recvmsg_multishot(
+        mut self,
+        fd: RawHandle,
+        msghdr_ptr: UnsafePointer[c_void, StaticConstantOrigin],
+        buf_group: UInt16,
+        token: UInt64,
+    ) raises:
+        """Queue a multishot recvmsg with provided buffer selection.
+
+        Produces one CQE per received message. The buffer ID is in
+        CQE.flags >> 16 when IORING_CQE_F_BUFFER is set.
+        Re-submit when CQE flags lack IORING_CQE_F_MORE.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (recvmsg_multishot)"
+        _ = RecvMsg(sq.__next__(), fd, msghdr_ptr)
+            .ioprio(UInt16(IORING_RECV_MULTISHOT))
+            .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)
+            .buf_group(buf_group)
+            .user_data(token)
         self._pending += 1
 
     fn poll(mut self, *, wait_nr: UInt32 = 1) raises:
