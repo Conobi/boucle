@@ -213,6 +213,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         count: Int,
         group_id: UInt16,
         base_buf_id: UInt16,
+        token: UInt64 = 0,
     ) raises:
         """Register count contiguous buffers with io_uring.
 
@@ -232,7 +233,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
             UInt32(count),
             group_id,
             base_buf_id,
-        )
+        ).user_data(token)
         self._pending += 1
 
     fn reprovide_buffer(
@@ -241,6 +242,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         buf_size: Int,
         group_id: UInt16,
         buf_id: UInt16,
+        token: UInt64 = 0,
     ) raises:
         """Re-provide a single buffer after processing its data."""
         var sq = self._ring.sq()
@@ -256,7 +258,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
             UInt32(1),
             group_id,
             buf_id,
-        )
+        ).user_data(token)
         self._pending += 1
 
     fn submit_recvmsg_multishot(
@@ -463,6 +465,7 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         count: Int,
         group_id: UInt16,
         base_buf_id: UInt16,
+        token: UInt64 = 0,
     ) raises:
         var sq = self._ring.sq()
         if not sq:
@@ -473,7 +476,7 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         _ = ProvideBuffers(
             sq.__next__(), buf_ptr, UInt32(buf_size), UInt32(count),
             group_id, base_buf_id,
-        )
+        ).user_data(token)
         self._pending += 1
 
     fn reprovide_buffer(
@@ -482,6 +485,7 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         buf_size: Int,
         group_id: UInt16,
         buf_id: UInt16,
+        token: UInt64 = 0,
     ) raises:
         var sq = self._ring.sq()
         if not sq:
@@ -492,7 +496,7 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         _ = ProvideBuffers(
             sq.__next__(), ptr, UInt32(buf_size), UInt32(1),
             group_id, buf_id,
-        )
+        ).user_data(token)
         self._pending += 1
 
     fn submit_recvmsg_multishot(
