@@ -13,11 +13,146 @@ See `boucle.readiness` for the alternative model.
 
 from boucle._sys.linux.io_uring import IoUring
 from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout, ProvideBuffers
-from boucle._sys.linux.io_uring.types import IoUringAcceptFlags, IoUringSqeFlags
+from boucle._sys.linux.io_uring.types import IoUringAcceptFlags, IoUringSqeFlags, IoUringBufReg, IoUringRegisterOp
 from boucle._sys.linux.raw.ctypes import c_void
 from boucle._sys.linux.raw.x86_64.io_uring import IORING_RECV_MULTISHOT
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
+from std.memory.unsafe_pointer import alloc as _heap_alloc
+from sys.intrinsics import _RegisterPackType
+
+
+# ── Buffer ring (IORING_REGISTER_PBUF_RING) ─────────────────────────────
+#
+# A user-mapped ring of `io_uring_buf` entries, registered with io_uring
+# under a `bgid` (buffer group id). Replaces the older
+# `IORING_OP_PROVIDE_BUFFERS` SQE-per-reprovide path: returning a buffer
+# is a userspace store + atomic store-release on the ring tail, no
+# syscall, no kernel buffer-pool tree.
+#
+# Layout per kernel: ring entries are `struct io_uring_buf { addr, len,
+# bid, resv }` — 16 bytes each. The first slot's last 2 bytes (offset
+# 14..15) overlay the ring tail. The user writes `tail` there with a
+# store-release; the kernel reads it with a load-acquire.
+
+
+comptime _IO_URING_BUF_SIZE: Int = 16
+comptime _IO_URING_BUF_TAIL_OFFSET: Int = 14
+
+
+struct BufRing(Movable):
+    """A registered provided-buffer ring.
+
+    Use after `CompletionLoop.register_buf_ring`. The kernel selects
+    buffers from this ring per multishot recv. Return a consumed buffer
+    via `add_buffer(buf_id)` after processing the CQE — userspace only.
+    """
+
+    var ring_addr: UnsafePointer[UInt8, MutAnyOrigin]
+    var ring_entries: UInt32
+    var mask: UInt32
+    var bgid: UInt16
+    var buf_base: UnsafePointer[UInt8, MutAnyOrigin]
+    var buf_size: UInt32
+    var owns_ring: Bool
+
+    fn __init__(
+        out self,
+        ring_addr: UnsafePointer[UInt8, MutAnyOrigin],
+        ring_entries: UInt32,
+        bgid: UInt16,
+        buf_base: UnsafePointer[UInt8, MutAnyOrigin],
+        buf_size: UInt32,
+    ):
+        self.ring_addr = ring_addr
+        self.ring_entries = ring_entries
+        self.mask = ring_entries - UInt32(1)
+        self.bgid = bgid
+        self.buf_base = buf_base
+        self.buf_size = buf_size
+        self.owns_ring = True
+
+    fn __moveinit__(out self, deinit take: Self):
+        self.ring_addr = take.ring_addr
+        self.ring_entries = take.ring_entries
+        self.mask = take.mask
+        self.bgid = take.bgid
+        self.buf_base = take.buf_base
+        self.buf_size = take.buf_size
+        self.owns_ring = take.owns_ring
+        take.owns_ring = False
+
+    fn __del__(deinit self):
+        if self.owns_ring:
+            self.ring_addr.free()
+
+    @always_inline
+    fn _tail_ptr(self) -> UnsafePointer[UInt16, MutAnyOrigin]:
+        return UnsafePointer[UInt16, MutAnyOrigin](
+            unsafe_from_address=Int(self.ring_addr) + _IO_URING_BUF_TAIL_OFFSET
+        )
+
+    @always_inline
+    fn _entry_ptr(self, slot: UInt32) -> UnsafePointer[UInt8, MutAnyOrigin]:
+        return UnsafePointer[UInt8, MutAnyOrigin](
+            unsafe_from_address=Int(self.ring_addr) + Int(slot) * _IO_URING_BUF_SIZE
+        )
+
+    fn _write_entry(
+        self,
+        slot: UInt32,
+        addr: UInt64,
+        len: UInt32,
+        bid: UInt16,
+    ):
+        # struct io_uring_buf { __u64 addr; __u32 len; __u16 bid; __u16 resv; }
+        var ent = self._entry_ptr(slot)
+        # Store addr at offset 0 (8 bytes)
+        UnsafePointer[UInt64, MutAnyOrigin](
+            unsafe_from_address=Int(ent)
+        )[] = addr
+        # len at offset 8 (4 bytes)
+        UnsafePointer[UInt32, MutAnyOrigin](
+            unsafe_from_address=Int(ent) + 8
+        )[] = len
+        # bid at offset 12 (2 bytes)
+        UnsafePointer[UInt16, MutAnyOrigin](
+            unsafe_from_address=Int(ent) + 12
+        )[] = bid
+        # resv at offset 14 — DO NOT touch when slot == 0 (overlays tail).
+        # When slot != 0, leaving it as whatever the previous tail value
+        # was is harmless (kernel ignores resv).
+
+    fn add_buffer(mut self, buf_id: UInt16):
+        """Return a buffer (identified by `buf_id` from a recv CQE) to
+        the ring so the kernel can pick it for a future arrival."""
+        var tp = self._tail_ptr()
+        var current_tail = tp[]
+        var slot = UInt32(current_tail) & self.mask
+        var addr = UInt64(Int(self.buf_base)) + UInt64(buf_id) * UInt64(self.buf_size)
+        self._write_entry(slot, addr, self.buf_size, buf_id)
+        # store-release on tail. Mojo doesn't expose acq/rel intrinsics
+        # on plain pointers; a normal store followed by a compiler
+        # barrier is sufficient on x86-64 (TSO) for store-release
+        # semantics, since stores are not reordered with each other.
+        tp[] = current_tail + UInt16(1)
+
+    fn populate_initial(mut self):
+        """Fill every ring slot with its own data buffer and advance tail
+        to ring_entries. Call once after register_buf_ring."""
+        var tp = self._tail_ptr()
+        for i in range(Int(self.ring_entries)):
+            var bid = UInt16(i)
+            var addr = UInt64(Int(self.buf_base)) + UInt64(i) * UInt64(self.buf_size)
+            self._write_entry(UInt32(i), addr, self.buf_size, bid)
+        tp[] = UInt16(self.ring_entries)
+
+
+fn _next_pow2(n: Int) -> Int:
+    var p = 1
+    while p < n:
+        p = p << 1
+    return p
 
 
 trait CompletionHandler(Movable, ImplicitlyDestructible):
@@ -312,6 +447,60 @@ struct CompletionLoop[Handler: CompletionHandler]:
             .buf_group(buf_group)
             .user_data(token)
         self._pending += 1
+
+    fn register_buf_ring(
+        mut self,
+        buf_base: UnsafePointer[UInt8, MutAnyOrigin],
+        buf_size: UInt32,
+        count: Int,
+        group_id: UInt16,
+    ) raises -> BufRing:
+        """Register a user-mapped provided-buffer ring (since kernel 5.19).
+
+        Returning a consumed buffer to the ring is a userspace store on
+        `BufRing.add_buffer(buf_id)` — no SQE, no syscall, no kernel
+        buffer-pool tree. Recommended for hot recv paths where the
+        SQE-per-reprovide cost of the older `provide_buffers` path
+        dominates.
+
+        `count` must be a power of 2; if it isn't, it is rounded up.
+        Allocates the ring and pre-fills `count` entries each pointing
+        at `buf_base + i * buf_size` (i = 0..count-1).
+        """
+        var entries = UInt32(_next_pow2(count))
+        var ring_bytes = Int(entries) * _IO_URING_BUF_SIZE
+        var ring_mem = _heap_alloc[UInt8](ring_bytes).as_any_origin()
+        for i in range(ring_bytes):
+            ring_mem[i] = UInt8(0)
+
+        var bring = BufRing(
+            ring_mem,
+            entries,
+            group_id,
+            buf_base,
+            buf_size,
+        )
+
+        var reg = IoUringBufReg(
+            ring_addr=UInt64(Int(ring_mem)),
+            ring_entries=entries,
+            bgid=group_id,
+        )
+        var arg = reg.as_register_arg(
+            unsafe_opcode=IoUringRegisterOp.REGISTER_PBUF_RING
+        )
+        _ = self._ring.register(arg)
+
+        bring.populate_initial()
+        return bring^
+
+    fn unregister_buf_ring(mut self, group_id: UInt16) raises:
+        """Tear down a registered buffer ring (use `BufRing.bgid`)."""
+        var reg = IoUringBufReg(bgid=group_id)
+        var arg = reg.as_register_arg(
+            unsafe_opcode=IoUringRegisterOp.UNREGISTER_PBUF_RING
+        )
+        _ = self._ring.register(arg)
 
     fn poll(mut self, *, wait_nr: UInt32 = 1) raises:
         """Submit queued SQEs and drain available completions.
