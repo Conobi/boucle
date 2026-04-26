@@ -72,6 +72,19 @@ struct BufRing(Movable):
         self.buf_size = buf_size
         self.owns_ring = True
 
+    fn __init__(out self):
+        """Empty BufRing (no allocations). Use to construct an
+        H2ServerHandler-style consumer before `register_buf_ring`. The
+        consumer must move-assign the real BufRing into place before
+        any add_buffer / buf_base access."""
+        self.ring_addr = UnsafePointer[UInt8, MutAnyOrigin]()
+        self.ring_entries = UInt32(0)
+        self.mask = UInt32(0)
+        self.bgid = UInt16(0)
+        self.buf_base = UnsafePointer[UInt8, MutAnyOrigin]()
+        self.buf_size = UInt32(0)
+        self.owns_ring = False
+
     fn __moveinit__(out self, deinit take: Self):
         self.ring_addr = take.ring_addr
         self.ring_entries = take.ring_entries
