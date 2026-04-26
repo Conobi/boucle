@@ -275,3 +275,118 @@ struct CoroHandle(Movable):
             self._inner[].phase == CORO_CREATED
             or self._inner[].phase == CORO_SUSPENDED
         )
+
+    fn reset(
+        mut self,
+        body: CoroBody,
+        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](),
+    ) raises:
+        """Recycle this coroutine for a new body, reusing its stack and
+        ucontext storage. Caller must ensure the coro is CREATED or DONE
+        (i.e. not currently suspended or running). After reset, the coro
+        is in CREATED — call resume() to start the new body.
+
+        Used by `CoroutinePool` to amortise the per-request stack mmap
+        + setup_context cost across many request lifetimes."""
+        debug_assert(
+            self._inner[].phase == CORO_CREATED
+            or self._inner[].phase == CORO_DONE,
+            "reset() called on a running or suspended coroutine",
+        )
+        self._inner[].body = body
+        self._inner[].user_data = user_data
+        self._inner[].has_error = False
+        self._inner[].error_msg = String()
+        self._inner[].phase = CORO_CREATED
+
+        var stack_total = self._inner[].stack_total
+        var stack_size = stack_total - UInt(PAGE_SIZE)
+        var usable_stack = UnsafePointer[UInt8, MutExternalOrigin](
+            unsafe_from_address=Int(self._inner[].stack_base) + PAGE_SIZE
+        )
+        uc_getcontext(self._inner[].coro_ctx)
+        var trampoline_fn = _coro_trampoline
+        var fn_addr = Int(
+            UnsafePointer(to=trampoline_fn).bitcast[Int]()[]
+        )
+        setup_context(
+            self._inner[].coro_ctx,
+            stack_ptr=usable_stack,
+            stack_size=stack_size,
+            entry_addr=fn_addr,
+            arg_addr=Int(self._inner),
+        )
+
+
+# ── CoroutinePool ────────────────────────────────────────────────────────
+
+
+struct CoroutinePool(Movable):
+    """A free-list of `CoroHandle` instances. Reuses stacks + ucontexts
+    across multiple body executions, amortising the per-spawn mmap +
+    `getcontext` + `setup_context` cost.
+
+    The pool keeps up to `capacity` idle handles. `acquire()` returns an
+    idle handle reset for a new body, or allocates fresh if the free
+    list is empty. `release()` puts the handle back on the free list,
+    or destroys it if the cap is exceeded.
+
+    Per-thread safety: the pool itself is not thread-safe. In a worker
+    model where one thread owns one CompletionLoop, give that thread its
+    own pool.
+    """
+
+    var _free: List[UnsafePointer[CoroHandle, MutAnyOrigin]]
+    var _stack_size: UInt
+    var _capacity: Int
+
+    fn __init__(
+        out self,
+        *,
+        capacity: Int = 256,
+        stack_size: UInt = DEFAULT_STACK_SIZE,
+    ):
+        self._free = List[UnsafePointer[CoroHandle, MutAnyOrigin]]()
+        self._stack_size = stack_size
+        self._capacity = capacity
+
+    fn __moveinit__(out self, deinit take: Self):
+        self._free = take._free^
+        self._stack_size = take._stack_size
+        self._capacity = take._capacity
+
+    fn __del__(deinit self):
+        for i in range(len(self._free)):
+            var ptr = self._free[i]
+            ptr.destroy_pointee()
+            ptr.free()
+
+    fn acquire(
+        mut self,
+        body: CoroBody,
+        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](),
+    ) raises -> UnsafePointer[CoroHandle, MutAnyOrigin]:
+        """Return a `CoroHandle` ready to run `body`. Either pops from
+        the free list (fast path, just `reset`) or allocates fresh
+        (slow path, full `__init__`)."""
+        if len(self._free) > 0:
+            var ptr = self._free.pop()
+            ptr[].reset(body, user_data)
+            return ptr
+        var ptr = alloc[CoroHandle](1).as_any_origin()
+        var h = CoroHandle(body, user_data, self._stack_size)
+        ptr.init_pointee_move(h^)
+        return ptr
+
+    fn release(mut self, ptr: UnsafePointer[CoroHandle, MutAnyOrigin]):
+        """Return a (DONE) `CoroHandle` to the pool. Beyond `capacity`
+        idle handles, the surplus is destroyed instead of cached."""
+        if len(self._free) >= self._capacity:
+            ptr.destroy_pointee()
+            ptr.free()
+            return
+        self._free.append(ptr)
+
+    fn idle_count(self) -> Int:
+        """Number of idle handles currently parked in the pool."""
+        return len(self._free)
