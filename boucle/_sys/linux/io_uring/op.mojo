@@ -303,6 +303,11 @@ struct Recv[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
         return self^
 
     @always_inline("nodebug")
+    fn ioprio(var self, value: UInt16) -> Self:
+        self.sqe[].ioprio = value
+        return self^
+
+    @always_inline("nodebug")
     fn buf_group(var self, value: UInt16) -> Self:
         self.sqe[].buf_index_or_buf_group = value
         return self^

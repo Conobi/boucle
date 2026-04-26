@@ -284,6 +284,35 @@ struct CompletionLoop[Handler: CompletionHandler]:
             .user_data(token)
         self._pending += 1
 
+    fn submit_recv_multishot(
+        mut self,
+        fd: RawHandle,
+        buf_group: UInt16,
+        token: UInt64,
+    ) raises:
+        """Queue a multishot recv with provided buffer selection (TCP).
+
+        Like submit_recv but the kernel selects a buffer from `buf_group`
+        per arrival and produces one CQE per chunk. Unlike recvmsg, the
+        payload begins at offset 0 of the chosen buffer (no
+        io_uring_recvmsg_out header). The buffer ID is in
+        CQE.flags >> 16 when IORING_CQE_F_BUFFER is set; re-submit when
+        CQE flags lack IORING_CQE_F_MORE.
+
+        Buffer pointer (NULL) and length (0) are placeholders — the
+        kernel ignores them when BUFFER_SELECT is set.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (recv_multishot)"
+        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin]()
+        _ = Recv(sq.__next__(), fd, null_ptr, UInt(0))
+            .ioprio(UInt16(IORING_RECV_MULTISHOT))
+            .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)
+            .buf_group(buf_group)
+            .user_data(token)
+        self._pending += 1
+
     fn poll(mut self, *, wait_nr: UInt32 = 1) raises:
         """Submit queued SQEs and drain available completions.
 
@@ -510,6 +539,30 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         if not sq:
             raise "submission queue full (recvmsg_multishot)"
         _ = RecvMsg(sq.__next__(), fd, msghdr_ptr)
+            .ioprio(UInt16(IORING_RECV_MULTISHOT))
+            .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)
+            .buf_group(buf_group)
+            .user_data(token)
+        self._pending += 1
+
+    fn submit_recv_multishot(
+        mut self,
+        fd: RawHandle,
+        buf_group: UInt16,
+        token: UInt64,
+    ) raises:
+        """Queue a multishot recv with provided buffer selection (TCP).
+
+        Like submit_recv but the kernel selects a buffer from `buf_group`
+        per arrival and produces one CQE per chunk. The payload begins at
+        offset 0 of the chosen buffer (no io_uring_recvmsg_out header).
+        Re-submit when CQE flags lack IORING_CQE_F_MORE.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (recv_multishot)"
+        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin]()
+        _ = Recv(sq.__next__(), fd, null_ptr, UInt(0))
             .ioprio(UInt16(IORING_RECV_MULTISHOT))
             .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)
             .buf_group(buf_group)
