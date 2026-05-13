@@ -3,13 +3,15 @@ name = "boucle"
 version = "0.1.0"
 description = "Platform-agnostic I/O library for Mojo"
 license = "Apache-2.0"
-requires-python = ">=3.10"
-dependencies = []
-
-[dependency-groups]
-dev = [
-    "mojox",
+requires-python = ">=3.11"
+dependencies = [
+    "mojox>=0.2",
+    "mojo-compiler==0.26.2.0",
 ]
 
-[tool.uv]
-package = false
+[build-system]
+requires = ["mojox-build>=0.2", "mojo-compiler==0.26.2.0"]
+build-backend = "mojox_build"
+
+[tool.mojox-build]
+packages = ["boucle"]

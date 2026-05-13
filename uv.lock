@@ -1,21 +1,21 @@
 version = 1
 revision = 3
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [[package]]
 name = "boucle"
 version = "0.1.0"
-source = { virtual = "." }
-
-[package.dev-dependencies]
-dev = [
+source = { editable = "." }
+dependencies = [
+    { name = "mojo-compiler" },
     { name = "mojox" },
 ]
 
 [package.metadata]
-
-[package.metadata.requires-dev]
-dev = [{ name = "mojox" }]
+requires-dist = [
+    { name = "mojo-compiler", specifier = "==0.26.2.0" },
+    { name = "mojox", specifier = ">=0.2" },
+]
 
 [[package]]
 name = "mojo-compiler"
@@ -40,12 +40,12 @@ wheels = [
 
 [[package]]
 name = "mojox"
-version = "0.1.0"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mojo-compiler" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/55/81b7c4812ae6b8f7c37ba04fd33daf0ffc65d2101937f54696ff3cdc48cf/mojox-0.1.0.tar.gz", hash = "sha256:a42c3a9969c736208ed0376f0518192023ab142e3c2b9ce3edf9af6d0e99b4b8", size = 1634, upload-time = "2026-04-01T14:30:55.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/76/69013eaec349f9dd09ede18e5e9ff2d1e10fcc3bed0d02207f2e0519f366/mojox-0.2.0.tar.gz", hash = "sha256:3461797d0f83f8d04779be9bf3cae85530772cc6797fcd2f96f60f8aa3c53298", size = 1659, upload-time = "2026-05-13T11:59:34.174Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/e4/c2c4c23c9cd9e5239ab905b74170b0d36cfce2fcab5e56e0dd055279c4c1/mojox-0.1.0-py3-none-any.whl", hash = "sha256:66bab8746283fb0b3e2093f98ebeeb3bb54d12cd394d236da94a9da37ec0314d", size = 2722, upload-time = "2026-04-01T14:30:56.388Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/ec/d2b274ddfc2c54628d5dffb13c6cd44c398b0b2558a43073bd0388ebad57/mojox-0.2.0-py3-none-any.whl", hash = "sha256:b2e53f450cfcb8c7184822c3d2be53c4fd2b36f0281376299e1f2067651bdaea", size = 2481, upload-time = "2026-05-13T11:59:33.414Z" },
 ]
