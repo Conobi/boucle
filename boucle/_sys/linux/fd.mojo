@@ -1,4 +1,4 @@
-from ffi import external_call
+from std.ffi import external_call
 
 comptime UnsafeFd = Int32
 comptime NoFd: UnsafeFd = -1
