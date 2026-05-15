@@ -1,1 +1,5 @@
 *.mojopkg
+plans
+plans/
+docs/superpowers
+docs/superpowers/
