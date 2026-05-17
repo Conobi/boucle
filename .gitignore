@@ -3,3 +3,11 @@ plans
 plans/
 docs/superpowers
 docs/superpowers/
+
+# Internal docs — kept local, not committed
+specs/
+research/
+docs/project-context.md
+
+# Local agent guide — kept local
+CLAUDE.md
