@@ -32,7 +32,7 @@ from boucle._sys.linux.raw.x86_64.net import (
 # ===----------------------------------------------------------------------=== #
 
 
-trait SocketAddr(Defaultable):
+trait SocketAddr(Defaultable, ImplicitlyDestructible):
     comptime ADDR_LEN: socklen_t
 
     def addr_unsafe_ptr(
@@ -41,7 +41,7 @@ trait SocketAddr(Defaultable):
         ...
 
 
-trait SocketAddrMut(Defaultable):
+trait SocketAddrMut(Defaultable, ImplicitlyDestructible):
     def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
