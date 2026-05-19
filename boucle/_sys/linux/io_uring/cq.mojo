@@ -31,10 +31,7 @@ struct Cq[type: CQE](Movable, Sized, Boolable):
     # ===------------------------------------------------------------------=== #
 
     def __init__(out self, params: IoUringParams, *, sq_cq_mem: Region) raises:
-        constrained[
-            Self.type is CQE16 or Self.type is CQE32,
-            "CQE must be equal to CQE16 or CQE32",
-        ]()
+        comptime assert Self.type is CQE16 or Self.type is CQE32, "CQE must be equal to CQE16 or CQE32"
         _size_eq[Cqe[Self.type]](Self.type.size)
         _align_eq[Cqe[Self.type]](Self.type.align)
 

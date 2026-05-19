@@ -100,18 +100,13 @@ struct DTypeArray[
     @always_inline("nodebug")
     @staticmethod
     def _non_zero_size():
-        constrained[
-            Self.size > 0,
-            "the number of elements in an initialized `DTypeArray` must be > 0",
-        ]()
+        comptime assert Self.size > 0, "the number of elements in an initialized `DTypeArray` must be > 0"
 
     @always_inline("nodebug")
     @staticmethod
     def _is_valid():
         Self._non_zero_size()
-        constrained[
-            Self.dtype != DType.invalid, "dtype cannot be DType.invalid"
-        ]()
+        comptime assert Self.dtype != DType.invalid, "dtype cannot be DType.invalid"
 
     # ===------------------------------------------------------------------===#
     # Operator dunders
@@ -128,7 +123,7 @@ struct DTypeArray[
             The element at the given index.
         """
         Self._non_zero_size()
-        constrained[idx < Self.size, "index must be within bounds"]()
+        comptime assert idx < Self.size, "index must be within bounds"
 
         return __mlir_op.`pop.array.get`[
             _type = Scalar[Self.dtype],

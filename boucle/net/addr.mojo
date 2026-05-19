@@ -109,18 +109,18 @@ struct SocketAddrStorV4(TrivialRegisterPassable, SocketAddr):
 
     @always_inline
     def __init__(out self):
-        constrained[size_of[Self]() == 16]()
-        constrained[align_of[Self]() == 4]()
+        comptime assert size_of[Self]() == 16
+        comptime assert align_of[Self]() == 4
         self.addr = sockaddr_in()
 
     @always_inline
     def __init__[
         origin: ImmutOrigin
     ](out self, ref [origin] addr: SocketAddrV4):
-        constrained[size_of[Self]() == 16]()
-        constrained[align_of[Self]() == 4]()
-        constrained[size_of[addr.Octets]() == size_of[__be32]()]()
-        constrained[align_of[addr.Octets]() == align_of[__be32]()]()
+        comptime assert size_of[Self]() == 16
+        comptime assert align_of[Self]() == 4
+        comptime assert size_of[addr.Octets]() == size_of[__be32]()
+        comptime assert align_of[addr.Octets]() == align_of[__be32]()
 
 
         self.addr = sockaddr_in()
@@ -186,16 +186,16 @@ struct SocketAddrStorV6(TrivialRegisterPassable, SocketAddr):
 
     @always_inline
     def __init__(out self):
-        constrained[size_of[Self]() == 28]()
-        constrained[align_of[Self]() == 4]()
+        comptime assert size_of[Self]() == 28
+        comptime assert align_of[Self]() == 4
         self.addr = sockaddr_in6()
 
     @always_inline
     def __init__[
         origin: ImmutOrigin
     ](out self, ref [origin] addr: SocketAddrV6):
-        constrained[size_of[Self]() == 28]()
-        constrained[align_of[Self]() == 4]()
+        comptime assert size_of[Self]() == 28
+        comptime assert align_of[Self]() == 4
 
         # Convert 8x uint16 segments (host order) to big-endian bytes,
         # then pack into four UInt32 fields (sin6_addr_a/b/c/d).

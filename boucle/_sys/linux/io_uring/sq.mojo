@@ -53,10 +53,7 @@ struct Sq[type: SQE, polling: PollingMode](Movable, Sized, Boolable):
         sq_cq_mem: Region,
         sqes_mem: Region,
     ) raises:
-        constrained[
-            Self.type is SQE64 or Self.type is SQE128,
-            "SQE must be equal to SQE64 or SQE128",
-        ]()
+        comptime assert Self.type is SQE64 or Self.type is SQE128, "SQE must be equal to SQE64 or SQE128"
         _size_eq[Sqe[Self.type]](Self.type.size)
         _align_eq[Sqe[Self.type]](Self.type.align)
 

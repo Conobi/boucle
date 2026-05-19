@@ -60,7 +60,7 @@ def _atomic_load[
             UInt32(0)._mlir_value,
         )).cast[type]()
     else:
-        constrained[False, "unsupported atomic ordering"]()
+        comptime assert False, "unsupported atomic ordering"
         return unsafe_ptr[]
 
 

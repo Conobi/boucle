@@ -88,7 +88,7 @@ def mmap(
     Safety:
         Unsafe pointers and lots of special semantics.
     """
-    constrained[is_64bit()]()
+    comptime assert is_64bit()
 
     var res = syscall[__NR_mmap, UnsafePointer[c_void, StaticConstantOrigin]](
         unsafe_ptr, len, prot, flags, fd, offset
@@ -124,7 +124,7 @@ def mmap_anonymous(
     Safety:
         Unsafe pointers and lots of special semantics.
     """
-    constrained[is_64bit()]()
+    comptime assert is_64bit()
 
     var null_ptr = UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0)
     var res = syscall[__NR_mmap, UnsafePointer[c_void, StaticConstantOrigin]](

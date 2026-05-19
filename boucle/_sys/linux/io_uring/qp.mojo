@@ -64,10 +64,7 @@ struct IoUring[
     def __init__(
         out self, *, sq_entries: UInt32, mut params: IoUringParams
     ) raises:
-        constrained[
-            Self.polling is not SQPOLL,
-            "SQPOLL mode is disabled because Mojo does not have atomic fence",
-        ]()
+        comptime assert Self.polling is not SQPOLL, "SQPOLL mode is disabled because Mojo does not have atomic fence"
         comptime flags = Self.sqe.setup_flags | Self.cqe.setup_flags | Self.polling.setup_flags
         params.flags |= flags
 

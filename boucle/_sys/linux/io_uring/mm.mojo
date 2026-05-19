@@ -95,8 +95,8 @@ struct Region(Movable):
     def unsafe_ptr[
         T: AnyType
     ](self, *, offset: UInt32, count: UInt32) raises -> UnsafePointer[T, StaticConstantOrigin]:
-        constrained[align_of[T]() > 0]()
-        constrained[size_of[c_void]() == 1]()
+        comptime assert align_of[T]() > 0
+        comptime assert size_of[c_void]() == 1
 
         if _checked_add(offset, count * size_of[T]()) > UInt32(self.len):
             raise "offset is out of bounds"
