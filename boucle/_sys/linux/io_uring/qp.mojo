@@ -75,17 +75,17 @@ struct IoUring[
             fd = io_uring_setup[Self.is_registered](sq_entries, params)
             if not params.features & IoUringFeatureFlags.SINGLE_MMAP:
                 raise "system outdated"
-            sq_len = params.sq_off.array + params.sq_entries * size_of[UInt32]()
-            cq_len = params.cq_off.cqes + params.cq_entries * Self.cqe.size
+            sq_len = params.sq_off.array + params.sq_entries * UInt32(size_of[UInt32]())
+            cq_len = params.cq_off.cqes + params.cq_entries * UInt32(Self.cqe.size)
             sq_cq_mem = Region(
                 fd=fd.unsafe_fd(),
                 offset=IORING_OFF_SQ_RING,
-                len=Int(max(sq_len, cq_len)),
+                len=UInt(max(sq_len, cq_len)),
             )
             sqes_mem = Region(
                 fd=fd.unsafe_fd(),
                 offset=IORING_OFF_SQES,
-                len=Int(params.sq_entries * Self.sqe.size),
+                len=UInt(params.sq_entries * UInt32(Self.sqe.size)),
             )
             self.fd = fd^
             self.mem = MemoryMapping[Self.sqe, Self.cqe](

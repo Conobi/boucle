@@ -94,7 +94,7 @@ def _next_power_of_two(value: UInt32) -> UInt32:
     Returns:
         The smallest power of two greater than or equal to the input value.
     """
-    debug_assert(value <= (1 << (bit_width_of[UInt32]() - 1)), "result overflow")
+    debug_assert(value <= UInt32(1 << (bit_width_of[UInt32]() - 1)), "result overflow")
     return _one_less_than_next_power_of_two(value) + 1
 
 

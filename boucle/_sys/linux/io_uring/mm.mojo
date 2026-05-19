@@ -98,7 +98,7 @@ struct Region(Movable):
         comptime assert align_of[T]() > 0
         comptime assert size_of[c_void]() == 1
 
-        if _checked_add(offset, count * size_of[T]()) > UInt32(self.len):
+        if _checked_add(offset, count * UInt32(size_of[T]())) > UInt32(self.len):
             raise "offset is out of bounds"
         ptr = self.ptr + offset
         if Int(ptr) & (align_of[T]() - 1):
@@ -124,7 +124,7 @@ struct Region(Movable):
 
     @always_inline
     def addr(self) -> UInt64:
-        return Int(self.ptr)
+        return UInt64(Int(self.ptr))
 
 
 struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
@@ -148,14 +148,14 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
         )
         # FIXME: Get the actual page size value at runtime.
         comptime page_size = 4096
-        sqes_size = entries.sq_entries * Self.sqe.size
+        sqes_size = entries.sq_entries * UInt32(Self.sqe.size)
         sq_array_size = (
             0 if params.flags
             & IoUringSetupFlags.NO_SQARRAY else entries.sq_entries
-            * size_of[UInt32]()
+            * UInt32(size_of[UInt32]())
         )
         sq_cq_size = (
-            Self.cqe.rings_size + entries.cq_entries * Self.cqe.size + sq_array_size
+            UInt32(Self.cqe.rings_size) + entries.cq_entries * UInt32(Self.cqe.size) + sq_array_size
         )
 
         comptime HUGE_PAGE_SIZE = 1 << 21
@@ -170,7 +170,7 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
             flags |= MapFlags.HUGETLB | MapFlags.HUGE_2MB
 
         self.sqes_mem = Region(
-            len=Int(sqes_size), flags=flags
+            len=UInt(sqes_size), flags=flags
         )
 
         flags = MapFlags()
@@ -181,7 +181,7 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
             flags |= MapFlags.HUGETLB | MapFlags.HUGE_2MB
 
         self.sq_cq_mem = Region(
-            len=Int(sq_cq_size), flags=flags
+            len=UInt(sq_cq_size), flags=flags
         )
 
         params.cq_off.user_addr = self.sq_cq_mem.addr()
