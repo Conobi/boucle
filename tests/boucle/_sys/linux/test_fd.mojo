@@ -2,7 +2,7 @@ from boucle._sys.linux.fd import close, dup, UnsafeFd, NoFd, unsafe_fd_as_arg
 from std.testing import assert_true
 
 
-fn main() raises:
+def main() raises:
     # NoFd sentinel is -1
     assert_true(NoFd == -1)
 

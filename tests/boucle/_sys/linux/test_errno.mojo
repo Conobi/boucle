@@ -2,7 +2,7 @@ from boucle._sys.linux.errno import Errno, _check_for_errors
 from std.testing import assert_true, assert_false
 
 
-fn main() raises:
+def main() raises:
     # Construction from raw errno number
     var e = Errno(errno=13)
     assert_true(e is Errno.EACCES)

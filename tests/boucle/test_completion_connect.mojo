@@ -18,7 +18,7 @@ struct ConnectTracker(CompletionHandler):
     var last_result: Int32
     var count: Int
 
-    fn __init__(out self):
+    def __init__(out self):
         self.last_token = 0
         self.last_result = 0
         self.count = 0
@@ -28,13 +28,13 @@ struct ConnectTracker(CompletionHandler):
         self.last_result = take.last_result
         self.count = take.count
 
-    fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
         self.last_token = token
         self.last_result = result
         self.count += 1
 
 
-fn main() raises:
+def main() raises:
     # Create a listening TCP socket on a loopback ephemeral port.
     var server = Socket.tcp_v4()
     var bind_addr = SocketAddrV4(127, 0, 0, 1, port=0)

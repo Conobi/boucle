@@ -16,11 +16,11 @@ struct AtomicOrdering(TrivialRegisterPassable):
     var id: UInt8
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt8):
+    def __init__(out self, *, unsafe_id: UInt8):
         self.id = unsafe_id
 
     @always_inline("nodebug")
-    fn __is__(self, rhs: Self) -> Bool:
+    def __is__(self, rhs: Self) -> Bool:
         """Defines whether one AtomicOrdering has the same identity as another.
 
         Args:
@@ -33,7 +33,7 @@ struct AtomicOrdering(TrivialRegisterPassable):
 
 
 @always_inline("nodebug")
-fn _atomic_load[
+def _atomic_load[
     type: DType, //, ordering: AtomicOrdering
 ](unsafe_ptr: UnsafePointer[Scalar[type], StaticConstantOrigin]) -> Scalar[type]:
     addr = unsafe_ptr.bitcast[UInt32]().bitcast[
@@ -65,7 +65,7 @@ fn _atomic_load[
 
 
 @always_inline("nodebug")
-fn _atomic_store[type: DType](unsafe_ptr: UnsafePointer[Scalar[type], StaticConstantOrigin], rhs: Scalar[type]):
+def _atomic_store[type: DType](unsafe_ptr: UnsafePointer[Scalar[type], StaticConstantOrigin], rhs: Scalar[type]):
     # TODO: use atomic store when it becomes available.
     _ = __mlir_op.`pop.atomic.rmw`[
         bin_op = __mlir_attr.`#pop<bin_op xchg>`,
@@ -80,7 +80,7 @@ fn _atomic_store[type: DType](unsafe_ptr: UnsafePointer[Scalar[type], StaticCons
 
 
 @always_inline("nodebug")
-fn _next_power_of_two(value: UInt32) -> UInt32:
+def _next_power_of_two(value: UInt32) -> UInt32:
     """Returns the smallest power of two greater than or equal
     to the input value.
 
@@ -99,7 +99,7 @@ fn _next_power_of_two(value: UInt32) -> UInt32:
 
 
 @always_inline("nodebug")
-fn _one_less_than_next_power_of_two(value: UInt32) -> UInt32:
+def _one_less_than_next_power_of_two(value: UInt32) -> UInt32:
     """Returns one less than the next power of two.
 
     Args:
@@ -124,7 +124,7 @@ fn _one_less_than_next_power_of_two(value: UInt32) -> UInt32:
     return UInt32.MAX >> z
 
 @always_inline("nodebug")
-fn _add_with_overflow(lhs: UInt32, rhs: UInt32) -> _AddOverflowResult:
+def _add_with_overflow(lhs: UInt32, rhs: UInt32) -> _AddOverflowResult:
     """Computes `lhs + rhs` and a `Bool` indicating overflow.
 
     Args:
@@ -141,7 +141,7 @@ fn _add_with_overflow(lhs: UInt32, rhs: UInt32) -> _AddOverflowResult:
     ](lhs, rhs)
 
 @always_inline("nodebug")
-fn _checked_add(lhs: UInt32, rhs: UInt32) raises -> UInt32:
+def _checked_add(lhs: UInt32, rhs: UInt32) raises -> UInt32:
     """Computes `lhs + rhs`.
 
     Args:

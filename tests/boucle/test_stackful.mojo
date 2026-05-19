@@ -9,68 +9,68 @@ from std.testing import assert_equal, assert_true
 struct _CreateDestroyState:
     var checked: Bool
 
-    fn __init__(out self):
+    def __init__(out self):
         self.checked = False
 
 
 struct _SingleYieldState:
     var step: Int
 
-    fn __init__(out self, step: Int):
+    def __init__(out self, step: Int):
         self.step = step
 
 
 struct _RunToCompletionState:
     var value: Int
 
-    fn __init__(out self, value: Int):
+    def __init__(out self, value: Int):
         self.value = value
 
 
 struct _CounterState:
     var counter: Int
 
-    fn __init__(out self, counter: Int):
+    def __init__(out self, counter: Int):
         self.counter = counter
 
 
 struct _CumulativeState:
     var total: Int
 
-    fn __init__(out self, total: Int):
+    def __init__(out self, total: Int):
         self.total = total
 
 
 struct _ErrorAfterYieldState:
     var step: Int
 
-    fn __init__(out self, step: Int):
+    def __init__(out self, step: Int):
         self.step = step
 
 
 # ── Body functions ────────────────────────────────────────────────────────
 
 
-fn _single_yield_body(mut y: CoroYielder) raises:
+def _single_yield_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_SingleYieldState]()
     state[].step = 1
     y.yield_to_caller()
     state[].step = 2
 
 
-fn _run_to_completion_body(mut y: CoroYielder) raises:
+def _run_to_completion_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_RunToCompletionState]()
     state[].value = 42
 
 
-fn _multiple_yields_body(mut y: CoroYielder) raises:
+def _multiple_yields_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_CounterState]()
     for _ in range(5):
         state[].counter += 1
         y.yield_to_caller()
 
 
-fn _cumulative_body(mut y: CoroYielder) raises:
+def _cumulative_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_CumulativeState]()
     state[].total += 10
     y.yield_to_caller()
@@ -79,11 +79,11 @@ fn _cumulative_body(mut y: CoroYielder) raises:
     state[].total += 30
 
 
-fn _error_immediate_body(mut y: CoroYielder) raises:
+def _error_immediate_body(mut y: CoroYielder) raises:
     raise "coroutine error"
 
 
-fn _error_after_yield_body(mut y: CoroYielder) raises:
+def _error_after_yield_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_ErrorAfterYieldState]()
     state[].step = 1
     y.yield_to_caller()
@@ -94,14 +94,14 @@ fn _error_after_yield_body(mut y: CoroYielder) raises:
 # ── Tests ─────────────────────────────────────────────────────────────────
 
 
-fn test_create_destroy() raises:
+def test_create_destroy() raises:
     var coro = CoroHandle(_run_to_completion_body)
     assert_true(coro.can_resume())
     assert_true(not coro.is_done())
     # coro goes out of scope in CREATED state -- __del__ should handle it
 
 
-fn test_single_yield() raises:
+def test_single_yield() raises:
     var state = _SingleYieldState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
         unsafe_from_address=Int(UnsafePointer(to=state))
@@ -114,7 +114,7 @@ fn test_single_yield() raises:
     assert_true(coro.is_done())
 
 
-fn test_run_to_completion() raises:
+def test_run_to_completion() raises:
     var state = _RunToCompletionState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
         unsafe_from_address=Int(UnsafePointer(to=state))
@@ -125,7 +125,7 @@ fn test_run_to_completion() raises:
     assert_true(coro.is_done())
 
 
-fn test_multiple_yields() raises:
+def test_multiple_yields() raises:
     var state = _CounterState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
         unsafe_from_address=Int(UnsafePointer(to=state))
@@ -138,7 +138,7 @@ fn test_multiple_yields() raises:
     assert_true(coro.is_done())
 
 
-fn test_shared_state() raises:
+def test_shared_state() raises:
     var state = _CumulativeState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
         unsafe_from_address=Int(UnsafePointer(to=state))
@@ -153,7 +153,7 @@ fn test_shared_state() raises:
     assert_true(coro.is_done())
 
 
-fn test_error_propagation() raises:
+def test_error_propagation() raises:
     var coro = CoroHandle(_error_immediate_body)
     var caught = False
     try:
@@ -164,7 +164,7 @@ fn test_error_propagation() raises:
     assert_true(coro.is_done())
 
 
-fn test_error_after_yield() raises:
+def test_error_after_yield() raises:
     var state = _ErrorAfterYieldState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
         unsafe_from_address=Int(UnsafePointer(to=state))
@@ -182,7 +182,7 @@ fn test_error_after_yield() raises:
     assert_true(coro.is_done())
 
 
-fn test_move_handle() raises:
+def test_move_handle() raises:
     """CoroHandle move preserves stable _CoroInner address — resume works after move."""
     var state = _CounterState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
@@ -205,7 +205,7 @@ fn test_move_handle() raises:
     assert_equal(state.counter, 5)
 
 
-fn _alternation_body(mut y: CoroYielder) raises:
+def _alternation_body(mut y: CoroYielder) raises:
     var state = y.user_data().bitcast[_CounterState]()
     state[].counter += 1
     y.yield_to_caller()
@@ -214,7 +214,7 @@ fn _alternation_body(mut y: CoroYielder) raises:
     state[].counter += 1
 
 
-fn test_multiple_live_coros() raises:
+def test_multiple_live_coros() raises:
     """Multiple live coroutines resumed in alternation — the event loop pattern."""
     var state_a = _CounterState(0)
     var state_b = _CounterState(0)
@@ -260,7 +260,7 @@ fn test_multiple_live_coros() raises:
     assert_true(coro_c.is_done())
 
 
-fn test_custom_stack_size() raises:
+def test_custom_stack_size() raises:
     """Custom stack_size parameter works (smaller than default)."""
     var state = _RunToCompletionState(0)
     var state_ptr = UnsafePointer[NoneType, MutExternalOrigin](
@@ -275,7 +275,7 @@ fn test_custom_stack_size() raises:
     assert_true(coro.is_done())
 
 
-fn main() raises:
+def main() raises:
     test_create_destroy()
     test_single_yield()
     test_run_to_completion()

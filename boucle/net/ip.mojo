@@ -12,7 +12,7 @@ struct IpAddrV4(TrivialRegisterPassable):
     var octets: Self.Octets
 
     @always_inline
-    fn __init__(out self, a: UInt8, b: UInt8, c: UInt8, d: UInt8):
+    def __init__(out self, a: UInt8, b: UInt8, c: UInt8, d: UInt8):
         self.octets = Self.Octets(a, b, c, d)
 
 
@@ -23,7 +23,7 @@ struct IpAddrV6(TrivialRegisterPassable):
     var segments: Self.Segments
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self,
         a: UInt16,
         b: UInt16,

@@ -16,26 +16,26 @@ struct Interest(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         return self.value | rhs.value
 
     @always_inline("nodebug")
-    fn __ior__(mut self, rhs: Self):
+    def __ior__(mut self, rhs: Self):
         self = self | rhs
 
     @always_inline("nodebug")
-    fn is_readable(self) -> Bool:
+    def is_readable(self) -> Bool:
         return self.value & EPOLLIN != 0
 
     @always_inline("nodebug")
-    fn is_writable(self) -> Bool:
+    def is_writable(self) -> Bool:
         return self.value & EPOLLOUT != 0

@@ -2,7 +2,7 @@ from boucle.buffer import IOBuffer
 from std.testing import assert_equal, assert_true
 
 
-fn main() raises:
+def main() raises:
     var data = List[UInt8](length=64, fill=UInt8(0))
     var buf = IOBuffer(data)
 

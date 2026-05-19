@@ -20,7 +20,7 @@ from boucle._sys.linux.raw.x86_64.ucontext import (
 
 
 @always_inline
-fn alloc_ucontext() -> UnsafePointer[UInt8, MutExternalOrigin]:
+def alloc_ucontext() -> UnsafePointer[UInt8, MutExternalOrigin]:
     """Allocate a zeroed ucontext_t buffer (968 bytes)."""
     var ctx = alloc[UInt8](UCONTEXT_SIZE)
     memset(ctx, 0, UCONTEXT_SIZE)
@@ -28,13 +28,13 @@ fn alloc_ucontext() -> UnsafePointer[UInt8, MutExternalOrigin]:
 
 
 @always_inline
-fn free_ucontext(ctx: UnsafePointer[UInt8, MutExternalOrigin]):
+def free_ucontext(ctx: UnsafePointer[UInt8, MutExternalOrigin]):
     """Free a ucontext_t buffer."""
     ctx.free()
 
 
 @always_inline
-fn uc_getcontext(ctx: UnsafePointer[UInt8, MutExternalOrigin]) raises:
+def uc_getcontext(ctx: UnsafePointer[UInt8, MutExternalOrigin]) raises:
     """Initialize a ucontext_t by saving the current context.
 
     Args:
@@ -46,7 +46,7 @@ fn uc_getcontext(ctx: UnsafePointer[UInt8, MutExternalOrigin]) raises:
 
 
 @always_inline
-fn uc_swapcontext(
+def uc_swapcontext(
     save_ctx: UnsafePointer[UInt8, MutExternalOrigin], load_ctx: UnsafePointer[UInt8, MutExternalOrigin]
 ) raises:
     """Save current context and switch to another.
@@ -60,7 +60,7 @@ fn uc_swapcontext(
         raise "swapcontext failed"
 
 
-fn uc_swapcontext_unchecked(
+def uc_swapcontext_unchecked(
     save_ctx: UnsafePointer[UInt8, MutExternalOrigin], load_ctx: UnsafePointer[UInt8, MutExternalOrigin]
 ):
     """Save current context and switch to another (non-raising).
@@ -71,7 +71,7 @@ fn uc_swapcontext_unchecked(
     debug_assert(res == 0, "swapcontext failed")
 
 
-fn setup_context(
+def setup_context(
     ctx: UnsafePointer[UInt8, MutExternalOrigin],
     *,
     stack_ptr: UnsafePointer[UInt8, MutExternalOrigin],

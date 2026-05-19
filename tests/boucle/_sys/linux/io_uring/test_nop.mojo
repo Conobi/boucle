@@ -3,7 +3,7 @@ from boucle._sys.linux.io_uring.op import Nop
 from std.testing import assert_equal
 
 
-fn main() raises:
+def main() raises:
     var ring = IoUring[](sq_entries=16)
 
     # Submit 16 NOPs

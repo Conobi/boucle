@@ -21,7 +21,7 @@ struct SocketType(TrivialRegisterPassable):
     var id: Int32
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: Int32):
+    def __init__(out self, *, unsafe_id: Int32):
         self.id = unsafe_id
 
 
@@ -34,16 +34,16 @@ struct SocketFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -67,7 +67,7 @@ struct AddrFamily(TrivialRegisterPassable):
     var id: UInt16  # __kernel_sa_family_t
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt16):
+    def __init__(out self, *, unsafe_id: UInt16):
         self.id = unsafe_id
 
 
@@ -109,11 +109,11 @@ struct Protocol(TrivialRegisterPassable, Defaultable):
     var id: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self = Self(unsafe_id=0)  # IPPROTO_IP
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt32):
+    def __init__(out self, *, unsafe_id: UInt32):
         self.id = unsafe_id
 
 
@@ -131,16 +131,16 @@ struct SendFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -166,16 +166,16 @@ struct RecvFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -195,7 +195,7 @@ struct Backlog(TrivialRegisterPassable):
     var value: Int32
 
     @always_inline("nodebug")
-    fn __init__(out self, value: Int32):
+    def __init__(out self, value: Int32):
         self.value = value
 
 
@@ -209,5 +209,5 @@ struct Shutdown(TrivialRegisterPassable):
     var value: Int32
 
     @always_inline("nodebug")
-    fn __init__(out self, value: Int32):
+    def __init__(out self, value: Int32):
         self.value = value

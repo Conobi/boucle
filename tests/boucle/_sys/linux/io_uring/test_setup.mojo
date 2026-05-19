@@ -10,7 +10,7 @@ from boucle._sys.linux.io_uring import (
 from std.testing import assert_true, assert_equal
 
 
-fn main() raises:
+def main() raises:
     # --- Test 1: io_uring_setup with 16 entries returns a valid fd ---
     var params = IoUringParams()
     params.flags |= IoUringSetupFlags.NO_SQARRAY

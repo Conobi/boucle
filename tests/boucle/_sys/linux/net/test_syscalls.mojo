@@ -4,7 +4,7 @@ from boucle.net.options import AddrFamily, SocketType, SocketFlags, Protocol, Ba
 from std.testing import assert_true
 
 
-fn main() raises:
+def main() raises:
     # Create a TCP socket directly via _sys wrapper
     var tcp = socket(AddrFamily.INET, SocketType.STREAM, Protocol.TCP)
     assert_true(tcp.raw() > -1)

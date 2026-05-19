@@ -8,7 +8,7 @@ from testing import assert_equal
 from std.sys.info import size_of
 
 
-fn main() raises:
+def main() raises:
     assert_equal(size_of[in_addr](), 4)
     assert_equal(size_of[sockaddr_in](), 16)
     assert_equal(size_of[in6_addr](), 16)

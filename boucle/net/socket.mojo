@@ -27,11 +27,11 @@ struct Socket:
     var _handle: OwnedHandle
 
     @always_inline
-    fn __init__(out self, var handle: OwnedHandle):
+    def __init__(out self, var handle: OwnedHandle):
         self._handle = handle^
 
     @staticmethod
-    fn tcp_v4() raises -> Self:
+    def tcp_v4() raises -> Self:
         """Creates a non-blocking TCP IPv4 socket."""
         return Self(
             _sys_socket(
@@ -43,7 +43,7 @@ struct Socket:
         )
 
     @staticmethod
-    fn tcp_v6() raises -> Self:
+    def tcp_v6() raises -> Self:
         """Creates a non-blocking TCP IPv6 socket."""
         return Self(
             _sys_socket(
@@ -55,7 +55,7 @@ struct Socket:
         )
 
     @staticmethod
-    fn udp_v4() raises -> Self:
+    def udp_v4() raises -> Self:
         """Creates a non-blocking UDP IPv4 socket."""
         return Self(
             _sys_socket(
@@ -67,7 +67,7 @@ struct Socket:
         )
 
     @staticmethod
-    fn udp_v6() raises -> Self:
+    def udp_v6() raises -> Self:
         """Creates a non-blocking UDP IPv6 socket."""
         return Self(
             _sys_socket(
@@ -78,15 +78,15 @@ struct Socket:
             )
         )
 
-    fn bind[Addr: SocketAddrStor](self, ref addr: Addr) raises:
+    def bind[Addr: SocketAddrStor](self, ref addr: Addr) raises:
         """Binds the socket to the given address."""
         _sys_bind(self._handle, addr)
 
-    fn listen(self, backlog: Backlog) raises:
+    def listen(self, backlog: Backlog) raises:
         """Marks the socket as passive for accepting connections."""
         _sys_listen(self._handle, backlog)
 
     @always_inline
-    fn raw(self) -> RawHandle:
+    def raw(self) -> RawHandle:
         """Returns the underlying raw handle value."""
         return self._handle.raw()

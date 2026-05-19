@@ -58,7 +58,7 @@ from std.memory import UnsafePointer
 
 
 @always_inline
-fn mmap(
+def mmap(
     *,
     unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin],
     len: UInt,
@@ -98,7 +98,7 @@ fn mmap(
 
 
 @always_inline
-fn mmap_anonymous(
+def mmap_anonymous(
     *,
     len: UInt,
     prot: ProtFlags,
@@ -135,7 +135,7 @@ fn mmap_anonymous(
 
 
 @always_inline
-fn munmap(*, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt) raises:
+def munmap(*, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt) raises:
     """Unsafely removes a memory mapping.
     [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html.
 
@@ -156,7 +156,7 @@ fn munmap(*, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt)
 
 
 @always_inline
-fn madvise(
+def madvise(
     *, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt, advice: Advice
 ) raises:
     """Unsafely declares the expected access pattern for the memory mapping.
@@ -180,7 +180,7 @@ fn madvise(
 
 
 @always_inline
-fn mprotect(
+def mprotect(
     *, unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin], len: UInt, prot: ProtFlags
 ) raises:
     """Changes the access protections for a memory region.
@@ -221,16 +221,16 @@ struct MapFlags(TrivialRegisterPassable, Defaultable):
     var value: c_uint
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: c_uint):
+    def __init__(out self, value: c_uint):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -242,7 +242,7 @@ struct MapFlags(TrivialRegisterPassable, Defaultable):
         return self.value | rhs.value
 
     @always_inline("nodebug")
-    fn __ior__(mut self, rhs: Self):
+    def __ior__(mut self, rhs: Self):
         """Computes `self | rhs` and saves the result in self.
 
         Args:
@@ -262,16 +262,16 @@ struct ProtFlags(TrivialRegisterPassable, Defaultable):
     var value: c_uint
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: c_uint):
+    def __init__(out self, value: c_uint):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -315,5 +315,5 @@ struct Advice(TrivialRegisterPassable):
     var id: c_uint
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: c_uint):
+    def __init__(out self, *, unsafe_id: c_uint):
         self.id = unsafe_id

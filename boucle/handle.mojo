@@ -16,7 +16,7 @@ struct OwnedHandle(Movable):
     var _raw: RawHandle
 
     @always_inline("nodebug")
-    fn __init__(out self, *, raw: RawHandle):
+    def __init__(out self, *, raw: RawHandle):
         debug_assert(raw > -1, "invalid handle")
         self._raw = raw
 
@@ -25,10 +25,10 @@ struct OwnedHandle(Movable):
         self._raw = take._raw
 
     @always_inline("nodebug")
-    fn __del__(deinit self):
+    def __del__(deinit self):
         close(unsafe_fd=self._raw)
 
     @always_inline("nodebug")
-    fn raw(self) -> RawHandle:
+    def raw(self) -> RawHandle:
         """Returns the underlying raw handle value."""
         return unsafe_fd_as_arg(self._raw)

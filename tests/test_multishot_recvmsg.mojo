@@ -22,7 +22,7 @@ struct Tracker(CompletionHandler):
     var results: InlineArray[Int32, 8]
     var flags_arr: InlineArray[UInt32, 8]
 
-    fn __init__(out self):
+    def __init__(out self):
         self.call_count = 0
         self.tokens = InlineArray[UInt64, 8](fill=0)
         self.results = InlineArray[Int32, 8](fill=0)
@@ -34,7 +34,7 @@ struct Tracker(CompletionHandler):
         self.results = take.results
         self.flags_arr = take.flags_arr
 
-    fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
         print(
             "CQE[",
             self.call_count,
@@ -52,7 +52,7 @@ struct Tracker(CompletionHandler):
         self.call_count += 1
 
 
-fn test_multishot_recvmsg() raises:
+def test_multishot_recvmsg() raises:
     # --- 1. Create UDP socket, bind to [::1]:0 ---
     var fd = external_call["socket", Int32](
         Int32(AF_INET6), Int32(SOCK_DGRAM), Int32(0)
@@ -291,5 +291,5 @@ fn test_multishot_recvmsg() raises:
     print("test_multishot_recvmsg PASSED")
 
 
-fn main() raises:
+def main() raises:
     test_multishot_recvmsg()

@@ -10,12 +10,12 @@ struct PollingMode(TrivialRegisterPassable, Identifiable):
     var setup_flags: UInt32
 
     @always_inline
-    fn __init__(out self, *, id: UInt8, setup_flags: UInt32):
+    def __init__(out self, *, id: UInt8, setup_flags: UInt32):
         self.id = id
         self.setup_flags = setup_flags
 
     @always_inline
-    fn __is__(self, rhs: Self) -> Bool:
+    def __is__(self, rhs: Self) -> Bool:
         """Defines whether one PollingMode has the same identity as another.
 
         Args:
@@ -27,7 +27,7 @@ struct PollingMode(TrivialRegisterPassable, Identifiable):
         return self.id == rhs.id and self.setup_flags == rhs.setup_flags
 
     @always_inline
-    fn __isnot__(self, rhs: Self) -> Bool:
+    def __isnot__(self, rhs: Self) -> Bool:
         """Defines whether one PollingMode has a different identity than another.
 
         Args:

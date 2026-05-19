@@ -35,19 +35,19 @@ from boucle._sys.linux.raw.x86_64.net import (
 trait SocketAddr(Defaultable):
     comptime ADDR_LEN: socklen_t
 
-    fn addr_unsafe_ptr(
+    def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         ...
 
 
 trait SocketAddrMut(Defaultable):
-    fn addr_unsafe_ptr(
+    def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         ...
 
-    fn len_unsafe_ptr(
+    def len_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         ...
@@ -56,7 +56,7 @@ trait SocketAddrMut(Defaultable):
 trait SocketAddrStor:
     comptime AddrStorType: SocketAddr
 
-    fn addr_stor(ref self, out result: Self.AddrStorType):
+    def addr_stor(ref self, out result: Self.AddrStorType):
         ...
 
 
@@ -64,7 +64,7 @@ trait SocketAddrStorMut:
     comptime AddrStorMutType: SocketAddrMut
 
     @staticmethod
-    fn addr_stor_mut(out result: Self.AddrStorMutType):
+    def addr_stor_mut(out result: Self.AddrStorMutType):
         ...
 
 
@@ -78,18 +78,18 @@ struct SocketAddrStorAnyMut[Addr: SocketAddr](SocketAddrMut):
     var len: socklen_t
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.addr = Self.Addr()
         self.len = Self.Addr.ADDR_LEN
 
     @always_inline
-    fn addr_unsafe_ptr(
+    def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         return self.addr.addr_unsafe_ptr()
 
     @always_inline
-    fn len_unsafe_ptr(
+    def len_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         return UnsafePointer[Int8, StaticConstantOrigin](
@@ -108,13 +108,13 @@ struct SocketAddrStorV4(TrivialRegisterPassable, SocketAddr):
     var addr: sockaddr_in
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         constrained[size_of[Self]() == 16]()
         constrained[align_of[Self]() == 4]()
         self.addr = sockaddr_in()
 
     @always_inline
-    fn __init__[
+    def __init__[
         origin: ImmutOrigin
     ](out self, ref [origin] addr: SocketAddrV4):
         constrained[size_of[Self]() == 16]()
@@ -134,7 +134,7 @@ struct SocketAddrStorV4(TrivialRegisterPassable, SocketAddr):
         )
 
     @always_inline
-    fn addr_unsafe_ptr(
+    def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         return UnsafePointer[Int8, StaticConstantOrigin](
@@ -154,23 +154,23 @@ struct SocketAddrV4(TrivialRegisterPassable, SocketAddrStor, SocketAddrStorMut):
     var port: UInt16
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self, a: UInt8, b: UInt8, c: UInt8, d: UInt8, *, port: UInt16
     ):
         self.ip = IpAddrV4(a, b, c, d)
         self.port = port
 
     @always_inline
-    fn octets(ref self) -> ref [self.ip.octets] Self.Octets:
+    def octets(ref self) -> ref [self.ip.octets] Self.Octets:
         return self.ip.octets
 
     @always_inline
-    fn addr_stor(ref self, out result: Self.AddrStorType):
+    def addr_stor(ref self, out result: Self.AddrStorType):
         result = Self.AddrStorType(self)
 
     @staticmethod
     @always_inline
-    fn addr_stor_mut(out result: Self.AddrStorMutType):
+    def addr_stor_mut(out result: Self.AddrStorMutType):
         result = Self.AddrStorMutType()
 
 
@@ -185,13 +185,13 @@ struct SocketAddrStorV6(TrivialRegisterPassable, SocketAddr):
     var addr: sockaddr_in6
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         constrained[size_of[Self]() == 28]()
         constrained[align_of[Self]() == 4]()
         self.addr = sockaddr_in6()
 
     @always_inline
-    fn __init__[
+    def __init__[
         origin: ImmutOrigin
     ](out self, ref [origin] addr: SocketAddrV6):
         constrained[size_of[Self]() == 28]()
@@ -214,7 +214,7 @@ struct SocketAddrStorV6(TrivialRegisterPassable, SocketAddr):
         self.addr.sin6_scope_id = addr.scope_id
 
     @always_inline
-    fn addr_unsafe_ptr(
+    def addr_unsafe_ptr(
         ref self,
     ) -> UnsafePointer[Int8, StaticConstantOrigin]:
         return UnsafePointer[Int8, StaticConstantOrigin](
@@ -235,7 +235,7 @@ struct SocketAddrV6(TrivialRegisterPassable, SocketAddrStor, SocketAddrStorMut):
     var scope_id: UInt32
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self,
         a: UInt16,
         b: UInt16,
@@ -254,14 +254,14 @@ struct SocketAddrV6(TrivialRegisterPassable, SocketAddrStor, SocketAddrStorMut):
         self.scope_id = scope_id
 
     @always_inline
-    fn segments(ref self) -> ref [self.ip.segments] Self.Segments:
+    def segments(ref self) -> ref [self.ip.segments] Self.Segments:
         return self.ip.segments
 
     @always_inline
-    fn addr_stor(ref self, out result: Self.AddrStorType):
+    def addr_stor(ref self, out result: Self.AddrStorType):
         result = Self.AddrStorType(self)
 
     @staticmethod
     @always_inline
-    fn addr_stor_mut(out result: Self.AddrStorMutType):
+    def addr_stor_mut(out result: Self.AddrStorMutType):
         result = Self.AddrStorMutType()

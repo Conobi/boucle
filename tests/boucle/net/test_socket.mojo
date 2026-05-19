@@ -4,7 +4,7 @@ from boucle.net.options import Backlog
 from std.testing import assert_true
 
 
-fn main() raises:
+def main() raises:
     # TCP IPv4
     var tcp4 = Socket.tcp_v4()
     assert_true(tcp4.raw() > -1)

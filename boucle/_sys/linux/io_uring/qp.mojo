@@ -47,10 +47,10 @@ struct IoUring[
     # Life cycle methods
     # ===------------------------------------------------------------------=== #
 
-    fn __init__(out self, *, sq_entries: UInt32) raises:
+    def __init__(out self, *, sq_entries: UInt32) raises:
         self = Self(sq_entries=sq_entries, params=Params())
 
-    fn __init__(out self, *, sq_entries: UInt32, params: Params) raises:
+    def __init__(out self, *, sq_entries: UInt32, params: Params) raises:
         io_uring_params = IoUringParams()
         io_uring_params.cq_entries = params._cq_entries
         io_uring_params.flags = params.flags
@@ -61,7 +61,7 @@ struct IoUring[
         if params.is_dontfork():
             self.mem.dontfork()
 
-    fn __init__(
+    def __init__(
         out self, *, sq_entries: UInt32, mut params: IoUringParams
     ) raises:
         constrained[
@@ -102,7 +102,7 @@ struct IoUring[
         )
         self._cq = Cq[Self.cqe](params, sq_cq_mem=self.mem.sq_cq_mem)
 
-    fn __del__(deinit self):
+    def __del__(deinit self):
         # Ensure that `MemoryMapping` is released before `self.fd`
         # as it may depend on it.
         self.mem^.__del__()
@@ -125,28 +125,28 @@ struct IoUring[
     # ===-------------------------------------------------------------------===#
 
     @always_inline
-    fn sq(
+    def sq(
         mut self,
     ) -> SqPtr[Self.sqe, Self.polling, origin_of(self._sq)]:
         self.sync_sq_head()
         return self.unsynced_sq()
 
     @always_inline
-    fn unsynced_sq(
+    def unsynced_sq(
         mut self,
     ) -> SqPtr[Self.sqe, Self.polling, origin_of(self._sq)]:
         return self._sq
 
     @always_inline
-    fn sync_sq_head(mut self):
+    def sync_sq_head(mut self):
         self._sq.sync_head()
 
     @always_inline
-    fn submit_and_wait(mut self, *, wait_nr: UInt32) raises -> UInt32:
+    def submit_and_wait(mut self, *, wait_nr: UInt32) raises -> UInt32:
         return self.submit_and_wait(wait_nr=wait_nr, arg=NO_ENTER_ARG)
 
     @always_inline
-    fn submit_and_wait(
+    def submit_and_wait(
         mut self, *, wait_nr: UInt32, arg: EnterArg
     ) raises -> UInt32:
         submitted = self._sq.flush()
@@ -164,7 +164,7 @@ struct IoUring[
         return submitted
 
     @always_inline
-    fn sq_needs_enter(
+    def sq_needs_enter(
         self, submitted: UInt32, mut flags: IoUringEnterFlags
     ) -> Bool:
         comptime if Self.polling is not SQPOLL:
@@ -184,20 +184,20 @@ struct IoUring[
         return False
 
     @always_inline
-    fn cq(
+    def cq(
         mut self, *, wait_nr: UInt32
     ) raises -> CqPtr[Self.cqe, origin_of(self._cq)]:
         return self.cq(wait_nr=wait_nr, arg=NO_ENTER_ARG)
 
     @always_inline
-    fn cq(
+    def cq(
         mut self, *, wait_nr: UInt32, arg: EnterArg
     ) raises -> CqPtr[Self.cqe, origin_of(self._cq)]:
         self.flush_cq(wait_nr, arg)
         return self._cq
 
     @always_inline
-    fn flush_cq(mut self, wait_nr: UInt32, arg: EnterArg) raises:
+    def flush_cq(mut self, wait_nr: UInt32, arg: EnterArg) raises:
         self._cq.sync_tail()
         if not self._cq and (wait_nr > 0 or self.cq_needs_flush()):
             _ = self.enter(
@@ -209,25 +209,25 @@ struct IoUring[
             self._cq.sync_tail()
 
     @always_inline
-    fn cq_needs_flush(self) -> Bool:
+    def cq_needs_flush(self) -> Bool:
         return Bool(
             self._sq.flags()
             & (IoUringSqFlags.CQ_OVERFLOW | IoUringSqFlags.TASKRUN)
         )
 
     @always_inline
-    fn cq_needs_enter(self) -> Bool:
+    def cq_needs_enter(self) -> Bool:
         comptime if Self.polling is IOPOLL:
             return True
         else:
             return self.cq_needs_flush()
 
     @always_inline
-    fn register(self, arg: RegisterArg) raises -> UInt32:
+    def register(self, arg: RegisterArg) raises -> UInt32:
         return io_uring_register(self.fd, arg)
 
     @always_inline
-    fn enter(
+    def enter(
         self,
         *,
         to_submit: UInt32,

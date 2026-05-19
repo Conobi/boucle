@@ -4,7 +4,7 @@ from boucle._sys.linux.mm import (
 from std.testing import assert_true
 
 
-fn main() raises:
+def main() raises:
     # Allocate one page of anonymous memory
     var ptr = mmap_anonymous(
         len=4096,

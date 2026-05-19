@@ -30,7 +30,7 @@ struct Cq[type: CQE](Movable, Sized, Boolable):
     # Life cycle methods
     # ===------------------------------------------------------------------=== #
 
-    fn __init__(out self, params: IoUringParams, *, sq_cq_mem: Region) raises:
+    def __init__(out self, params: IoUringParams, *, sq_cq_mem: Region) raises:
         constrained[
             Self.type is CQE16 or Self.type is CQE32,
             "CQE must be equal to CQE16 or CQE32",
@@ -92,7 +92,7 @@ struct Cq[type: CQE](Movable, Sized, Boolable):
     # ===-------------------------------------------------------------------===#
 
     @always_inline
-    fn __len__(self) -> Int:
+    def __len__(self) -> Int:
         """Returns the number of entries in the cq.
 
         Returns:
@@ -101,7 +101,7 @@ struct Cq[type: CQE](Movable, Sized, Boolable):
         return Int(self.cqe_tail - self.cqe_head)
 
     @always_inline
-    fn __bool__(self) -> Bool:
+    def __bool__(self) -> Bool:
         """Checks whether the cq has any entries or not.
 
         Returns:
@@ -114,15 +114,15 @@ struct Cq[type: CQE](Movable, Sized, Boolable):
     # ===-------------------------------------------------------------------===#
 
     @always_inline
-    fn sync_tail(mut self):
+    def sync_tail(mut self):
         self.cqe_tail = self.tail()
 
     @always_inline
-    fn sync_head(self):
+    def sync_head(self):
         _atomic_store(self._head, self.cqe_head)
 
     @always_inline
-    fn tail(self) -> UInt32:
+    def tail(self) -> UInt32:
         return _atomic_load[AtomicOrdering.ACQUIRE](self._tail)
 
 
@@ -135,11 +135,11 @@ struct CqPtr[type: CQE, cq_origin: MutOrigin](RegisterPassable, Sized, Boolable)
 
     @implicit
     @always_inline
-    fn __init__(out self, ref [Self.cq_origin]cq: Cq[Self.type]):
+    def __init__(out self, ref [Self.cq_origin]cq: Cq[Self.type]):
         self.cq = Pointer(to=cq)
 
     @always_inline
-    fn __del__(deinit self):
+    def __del__(deinit self):
         self.cq[].sync_head()
 
     # ===------------------------------------------------------------------=== #
@@ -147,11 +147,11 @@ struct CqPtr[type: CQE, cq_origin: MutOrigin](RegisterPassable, Sized, Boolable)
     # ===------------------------------------------------------------------=== #
 
     @always_inline
-    fn __iter__(var self) -> Self:
+    def __iter__(var self) -> Self:
         return self^
 
     @always_inline
-    fn __next__[
+    def __next__[
         origin: MutOrigin
     ](ref [origin]self) -> ref [origin] Cqe[
         Self.type
@@ -162,7 +162,7 @@ struct CqPtr[type: CQE, cq_origin: MutOrigin](RegisterPassable, Sized, Boolable)
         return mut_ptr[]
 
     @always_inline
-    fn __has_next__(self) -> Bool:
+    def __has_next__(self) -> Bool:
         return self.__len__() > 0
 
     # ===------------------------------------------------------------------=== #
@@ -170,7 +170,7 @@ struct CqPtr[type: CQE, cq_origin: MutOrigin](RegisterPassable, Sized, Boolable)
     # ===------------------------------------------------------------------=== #
 
     @always_inline
-    fn __len__(self) -> Int:
+    def __len__(self) -> Int:
         """Returns the number of entries in the cq.
 
         Returns:
@@ -179,7 +179,7 @@ struct CqPtr[type: CQE, cq_origin: MutOrigin](RegisterPassable, Sized, Boolable)
         return len(self.cq[])
 
     @always_inline
-    fn __bool__(self) -> Bool:
+    def __bool__(self) -> Bool:
         """Checks whether the cq has any entries or not.
 
         Returns:

@@ -15,7 +15,7 @@ struct EpollOp(ImplicitlyCopyable, Movable):
 
 
 @always_inline
-fn epoll_create() raises -> Int32:
+def epoll_create() raises -> Int32:
     """Creates an epoll instance with CLOEXEC flag."""
     var res = external_call["epoll_create1", Int32](Int32(0x80000))  # O_CLOEXEC
     if res < 0:
@@ -24,7 +24,7 @@ fn epoll_create() raises -> Int32:
 
 
 @always_inline
-fn epoll_ctl(
+def epoll_ctl(
     epfd: Int32, op: EpollOp, fd: Int32, ref event: epoll_event
 ) raises:
     """Add, modify, or remove a file descriptor from the epoll interest list."""
@@ -39,7 +39,7 @@ fn epoll_ctl(
 
 
 @always_inline
-fn epoll_wait(
+def epoll_wait(
     epfd: Int32,
     events: UnsafePointer[epoll_event, ...],
     *,

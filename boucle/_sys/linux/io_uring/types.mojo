@@ -190,16 +190,16 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __eq__(self, rhs: Self) -> Bool:
+    def __eq__(self, rhs: Self) -> Bool:
         """Compares one IoUringSetupFlags to another for equality.
 
         Args:
@@ -211,7 +211,7 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value == rhs.value
 
     @always_inline("nodebug")
-    fn __ne__(self, rhs: Self) -> Bool:
+    def __ne__(self, rhs: Self) -> Bool:
         """Compares one IoUringSetupFlags to another for inequality.
 
         Args:
@@ -223,7 +223,7 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value != rhs.value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -235,7 +235,7 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value | rhs.value
 
     @always_inline("nodebug")
-    fn __ior__(mut self, rhs: Self):
+    def __ior__(mut self, rhs: Self):
         """Computes `self | rhs` and saves the result in self.
 
         Args:
@@ -244,7 +244,7 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
         self = self | rhs
 
     @always_inline("nodebug")
-    fn __and__(self, rhs: Self) -> Self:
+    def __and__(self, rhs: Self) -> Self:
         """Returns `self & rhs`.
 
         Args:
@@ -256,7 +256,7 @@ struct IoUringSetupFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value & rhs.value
 
     @always_inline("nodebug")
-    fn __bool__(self) -> Bool:
+    def __bool__(self) -> Bool:
         """Converts this flags to Bool.
 
         Returns:
@@ -284,16 +284,16 @@ struct IoUringFeatureFlags(TrivialRegisterPassable, Defaultable, Boolable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __and__(self, rhs: Self) -> Self:
+    def __and__(self, rhs: Self) -> Self:
         """Returns `self & rhs`.
 
         Args:
@@ -305,7 +305,7 @@ struct IoUringFeatureFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value & rhs.value
 
     @always_inline("nodebug")
-    fn __bool__(self) -> Bool:
+    def __bool__(self) -> Bool:
         """Converts this flags to Bool.
 
         Returns:
@@ -351,7 +351,7 @@ struct IoUringRegisterOp(TrivialRegisterPassable):
     var id: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt32):
+    def __init__(out self, *, unsafe_id: UInt32):
         self.id = unsafe_id
 
 
@@ -363,12 +363,12 @@ struct IoUringRegisterFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
 
@@ -380,7 +380,7 @@ struct IoUringSqFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
 
@@ -394,16 +394,16 @@ struct IoUringEnterFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -415,7 +415,7 @@ struct IoUringEnterFlags(TrivialRegisterPassable, Defaultable):
         return self.value | rhs.value
 
     @always_inline("nodebug")
-    fn __ior__(mut self, rhs: Self):
+    def __ior__(mut self, rhs: Self):
         """Computes `self | rhs` and saves the result in self.
 
         Args:
@@ -436,16 +436,16 @@ struct IoUringSqeFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt8
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt8):
+    def __init__(out self, value: UInt8):
         self.value = value
 
     @always_inline("nodebug")
-    fn __or__(self, rhs: Self) -> Self:
+    def __or__(self, rhs: Self) -> Self:
         """Returns `self | rhs`.
 
         Args:
@@ -457,7 +457,7 @@ struct IoUringSqeFlags(TrivialRegisterPassable, Defaultable):
         return self.value | rhs.value
 
     @always_inline("nodebug")
-    fn __ior__(mut self, rhs: Self):
+    def __ior__(mut self, rhs: Self):
         """Computes `self | rhs` and saves the result in self.
 
         Args:
@@ -475,16 +475,16 @@ struct IoUringCqeFlags(TrivialRegisterPassable, Defaultable, Boolable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn __and__(self, rhs: Self) -> Self:
+    def __and__(self, rhs: Self) -> Self:
         """Returns `self & rhs`.
 
         Args:
@@ -496,7 +496,7 @@ struct IoUringCqeFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value & rhs.value
 
     @always_inline("nodebug")
-    fn __bool__(self) -> Bool:
+    def __bool__(self) -> Bool:
         """Converts this flags to Bool.
 
         Returns:
@@ -505,7 +505,7 @@ struct IoUringCqeFlags(TrivialRegisterPassable, Defaultable, Boolable):
         return self.value != 0
 
     @always_inline("nodebug")
-    fn __rshift__(self, rhs: Int) -> Self:
+    def __rshift__(self, rhs: Int) -> Self:
         """Returns `self >> rhs`.
 
         Args:
@@ -571,7 +571,7 @@ struct IoUringOp(TrivialRegisterPassable):
     var id: UInt8
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt8):
+    def __init__(out self, *, unsafe_id: UInt8):
         self.id = unsafe_id
 
 
@@ -581,12 +581,12 @@ struct IoUringFsyncFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
 
@@ -597,7 +597,7 @@ struct IoUringMsgRingCmds(TrivialRegisterPassable):
     var id: UInt64
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_id: UInt64):
+    def __init__(out self, *, unsafe_id: UInt64):
         self.id = unsafe_id
 
 
@@ -610,12 +610,12 @@ struct IoUringPollFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
 
@@ -627,12 +627,12 @@ struct IoUringSendFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt16
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt16):
+    def __init__(out self, value: UInt16):
         self.value = value
 
 
@@ -644,12 +644,12 @@ struct IoUringRecvFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt16
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt16):
+    def __init__(out self, value: UInt16):
         self.value = value
 
 
@@ -659,12 +659,12 @@ struct IoUringAcceptFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt16
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt16):
+    def __init__(out self, value: UInt16):
         self.value = value
 
 
@@ -675,12 +675,12 @@ struct IoUringMsgRingFlags(TrivialRegisterPassable, Defaultable):
     var value: UInt32
 
     @always_inline("nodebug")
-    fn __init__(out self):
+    def __init__(out self):
         self.value = 0
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
 
@@ -715,7 +715,7 @@ struct SQE(TrivialRegisterPassable):
     var setup_flags: IoUringSetupFlags
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self,
         *,
         id: UInt8,
@@ -731,7 +731,7 @@ struct SQE(TrivialRegisterPassable):
         self.setup_flags = setup_flags
 
     @always_inline
-    fn __is__(self, rhs: Self) -> Bool:
+    def __is__(self, rhs: Self) -> Bool:
         """Defines whether one SQE has the same identity as another.
 
         Args:
@@ -787,7 +787,7 @@ struct CQE(TrivialRegisterPassable):
     var setup_flags: IoUringSetupFlags
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self,
         *,
         id: UInt8,
@@ -805,7 +805,7 @@ struct CQE(TrivialRegisterPassable):
         self.setup_flags = setup_flags
 
     @always_inline
-    fn __is__(self, rhs: Self) -> Bool:
+    def __is__(self, rhs: Self) -> Bool:
         """Defines whether one CQE has the same identity as another.
 
         Args:
@@ -834,7 +834,7 @@ struct addr3_struct(Defaultable, ImplicitlyCopyable, Movable):
     var __pad2: DTypeArray[DType.uint64, 1]
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.addr3 = 0
         self.__pad2 = DTypeArray[DType.uint64, 1]()
 
@@ -862,7 +862,7 @@ struct Sqe[type: SQE](ImplicitlyCopyable, Movable):
     var _big_sqe: Self.Array
 
     @always_inline
-    fn cmd(
+    def cmd(
         mut self: Sqe[SQE128],
     ) -> ref [self.addr3_or_optval_or_cmd] DTypeArray[DType.uint8, 80]:
         return UnsafePointer(to=self.addr3_or_optval_or_cmd).bitcast[
@@ -881,7 +881,7 @@ struct Cqe[type: CQE](ImplicitlyCopyable, Movable):
     var _big_cqe: DTypeArray[DType.uint64, Self.type.array_size]
 
     @always_inline
-    fn cmd(
+    def cmd(
         self: Cqe[CQE32],
     ) -> ref [self._big_cqe] type_of(self._big_cqe):
         return self._big_cqe
@@ -905,7 +905,7 @@ struct IoUringParams(Defaultable, ImplicitlyCopyable, Movable):
     var cq_off: io_cqring_offsets
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.sq_entries = 0
         self.cq_entries = 0
         self.flags = IoUringSetupFlags()
@@ -930,7 +930,7 @@ trait IoUringFileDescriptor(Movable):
     comptime ENTER_FLAGS: IoUringEnterFlags
     comptime SQE_FLAGS: IoUringSqeFlags
 
-    fn unsafe_fd(self) -> UnsafeFd:
+    def unsafe_fd(self) -> UnsafeFd:
         ...
 
 
@@ -955,7 +955,7 @@ struct IoUringFd[is_registered: Bool](
     var _fd: UnsafeFd
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_fd: UnsafeFd):
+    def __init__(out self, *, unsafe_fd: UnsafeFd):
         """Constructs an IoUringFd from an unsafe file descriptor.
 
         Args:
@@ -967,7 +967,7 @@ struct IoUringFd[is_registered: Bool](
         self._fd = unsafe_fd
 
     @always_inline("nodebug")
-    fn unsafe_fd(self) -> UnsafeFd:
+    def unsafe_fd(self) -> UnsafeFd:
         """Extracts an unsafe file descriptor.
 
         Returns:
@@ -997,7 +997,7 @@ struct OwnedFd[is_registered: Bool = False](
     # ===------------------------------------------------------------------=== #
 
     @always_inline("nodebug")
-    fn __init__(out self, *, unsafe_fd: UnsafeFd):
+    def __init__(out self, *, unsafe_fd: UnsafeFd):
         """Constructs an OwnedFd from an unsafe file descriptor.
 
         Args:
@@ -1012,7 +1012,7 @@ struct OwnedFd[is_registered: Bool = False](
         self._fd = unsafe_fd
 
     @always_inline("nodebug")
-    fn __del__(deinit self):
+    def __del__(deinit self):
         """Closes/unregisters the file descriptor."""
         comptime if Self.is_registered:
             var op = IoUringRsrcUpdate()
@@ -1033,7 +1033,7 @@ struct OwnedFd[is_registered: Bool = False](
     # ===------------------------------------------------------------------=== #
 
     @always_inline("nodebug")
-    fn unsafe_fd(self) -> UnsafeFd:
+    def unsafe_fd(self) -> UnsafeFd:
         """Extracts an unsafe file descriptor.
 
         Returns:
@@ -1042,7 +1042,7 @@ struct OwnedFd[is_registered: Bool = False](
         return self._fd
 
     @always_inline("nodebug")
-    fn io_uring_fd(self) -> IoUringFd[Self.is_registered]:
+    def io_uring_fd(self) -> IoUringFd[Self.is_registered]:
         return IoUringFd[Self.is_registered](unsafe_fd=self._fd)
 
 
@@ -1065,7 +1065,7 @@ struct EnterArg[size: UInt, flags: IoUringEnterFlags, origin: ImmutOrigin](
     var arg_unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin]
 
     @always_inline("nodebug")
-    fn __init__(
+    def __init__(
         out self,
         *,
         arg_unsafe_ptr: UnsafePointer[c_void, StaticConstantOrigin],
@@ -1087,7 +1087,7 @@ struct IoUringGetEventsArg(Defaultable, ImplicitlyCopyable, Movable):
     var ts: UInt64
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.sigmask = 0
         self.sigmask_sz = 0
         self.pad = 0
@@ -1095,7 +1095,7 @@ struct IoUringGetEventsArg(Defaultable, ImplicitlyCopyable, Movable):
 
 
 trait AsRegisterArg:
-    fn as_register_arg[
+    def as_register_arg[
         origin: MutOrigin
     ](
         ref [origin] self, *, unsafe_opcode: IoUringRegisterOp
@@ -1112,7 +1112,7 @@ struct RegisterArg[origin: MutOrigin](TrivialRegisterPassable):
     """The number of resources for registration/deregistration."""
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self,
         *,
         opcode: IoUringRegisterOp,
@@ -1145,13 +1145,13 @@ struct IoUringRsrcUpdate(TrivialRegisterPassable, AsRegisterArg, Defaultable):
     var data: UInt64
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.offset = 0
         self.resv = 0
         self.data = 0
 
     @always_inline
-    fn as_register_arg[
+    def as_register_arg[
         origin: MutOrigin
     ](
         ref [origin] self, *, unsafe_opcode: IoUringRegisterOp
@@ -1174,7 +1174,7 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
     var resv: DTypeArray[DType.uint64, 3]
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.ring_addr = 0
         self.ring_entries = 0
         self.bgid = 0
@@ -1182,7 +1182,7 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
         self.resv = DTypeArray[DType.uint64, 3]()
 
     @always_inline
-    fn __init__(out self, *, bgid: UInt16):
+    def __init__(out self, *, bgid: UInt16):
         self.ring_addr = 0
         self.ring_entries = 0
         self.bgid = bgid
@@ -1190,7 +1190,7 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
         self.resv = DTypeArray[DType.uint64, 3]()
 
     @always_inline
-    fn __init__(
+    def __init__(
         out self, *, ring_addr: UInt64, ring_entries: UInt32, bgid: UInt16
     ):
         self.ring_addr = ring_addr
@@ -1200,7 +1200,7 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
         self.resv = DTypeArray[DType.uint64, 3]()
 
     @always_inline
-    fn as_register_arg[
+    def as_register_arg[
         origin: MutOrigin
     ](
         ref [origin] self, *, unsafe_opcode: IoUringRegisterOp
@@ -1222,7 +1222,7 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
 
 
 @always_inline
-fn io_uring_setup[
+def io_uring_setup[
     is_registered: Bool
 ](sq_entries: UInt32, mut params: IoUringParams) raises -> OwnedFd[
     is_registered
@@ -1257,7 +1257,7 @@ fn io_uring_setup[
 
 
 @always_inline
-fn io_uring_register[
+def io_uring_register[
     Fd: IoUringFileDescriptor
 ](fd: Fd, arg: RegisterArg) raises -> UInt32:
     """Registers/unregisters files or user buffers for asynchronous I/O.
@@ -1286,7 +1286,7 @@ fn io_uring_register[
 
 
 @always_inline
-fn io_uring_enter[
+def io_uring_enter[
     Fd: IoUringFileDescriptor
 ](
     fd: Fd,

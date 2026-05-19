@@ -4,29 +4,29 @@ from std.memory import UnsafePointer
 
 
 @always_inline("nodebug")
-fn is_x86_64() -> Bool:
+def is_x86_64() -> Bool:
     return not is_nvidia_gpu() and is_triple["x86_64-unknown-linux-gnu"]()
 
 
 @always_inline("nodebug")
-fn is_64bit() -> Bool:
+def is_64bit() -> Bool:
     return _is_64bit()
 
 
 @always_inline("nodebug")
-fn is_big_endian() -> Bool:
+def is_big_endian() -> Bool:
     return not is_little_endian()
 
 
 @always_inline("nodebug")
-fn is_little_endian() -> Bool:
+def is_little_endian() -> Bool:
     var val = UInt16(0x0001)
     var bytes = UnsafePointer(to=val).bitcast[UInt8]()
     return bytes[] == 1
 
 
 @always_inline("nodebug")
-fn _to_be[type: DType, size: Int](value: SIMD[type, size]) -> SIMD[type, size]:
+def _to_be[type: DType, size: Int](value: SIMD[type, size]) -> SIMD[type, size]:
     comptime if is_big_endian():
         return value
     else:
@@ -56,7 +56,7 @@ struct DTypeArray[
     # ===------------------------------------------------------------------===#
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         """Constructs a default DTypeArray."""
         Self._is_valid()
         self.array = __mlir_op.`pop.array.repeat`[_type = Self.type](
@@ -64,7 +64,7 @@ struct DTypeArray[
         )
 
     @always_inline
-    fn __init__(out self, *, unsafe_uninitialized: Bool):
+    def __init__(out self, *, unsafe_uninitialized: Bool):
         """Constructs a DTypeArray with uninitialized memory.
         Note that this is highly unsafe and should be used with caution.
 
@@ -79,7 +79,7 @@ struct DTypeArray[
         ]()
 
     @always_inline
-    fn __init__(out self, fill: Scalar[Self.dtype]):
+    def __init__(out self, fill: Scalar[Self.dtype]):
         """Constructs a DTypeArray where each element is the supplied `fill`.
 
         Args:
@@ -89,7 +89,7 @@ struct DTypeArray[
         self.array = __mlir_op.`pop.array.repeat`[_type = Self.type](fill)
 
     @always_inline
-    fn __init__(out self, *, other: Self):
+    def __init__(out self, *, other: Self):
         """Explicitly copy constructs a DTypeArray.
 
         Args:
@@ -99,7 +99,7 @@ struct DTypeArray[
 
     @always_inline("nodebug")
     @staticmethod
-    fn _non_zero_size():
+    def _non_zero_size():
         constrained[
             Self.size > 0,
             "the number of elements in an initialized `DTypeArray` must be > 0",
@@ -107,7 +107,7 @@ struct DTypeArray[
 
     @always_inline("nodebug")
     @staticmethod
-    fn _is_valid():
+    def _is_valid():
         Self._non_zero_size()
         constrained[
             Self.dtype != DType.invalid, "dtype cannot be DType.invalid"
@@ -118,7 +118,7 @@ struct DTypeArray[
     # ===------------------------------------------------------------------===#
 
     @always_inline("nodebug")
-    fn __getitem__[idx: UInt](self) -> Scalar[Self.dtype]:
+    def __getitem__[idx: UInt](self) -> Scalar[Self.dtype]:
         """Get the element at the given index.
 
         Parameters:
@@ -136,7 +136,7 @@ struct DTypeArray[
         ](self.array)
 
     @always_inline("nodebug")
-    fn __getitem__(ref self, idx: UInt) -> Scalar[Self.dtype]:
+    def __getitem__(ref self, idx: UInt) -> Scalar[Self.dtype]:
         """Get the element at the given index.
 
         Args:
@@ -156,7 +156,7 @@ struct DTypeArray[
     # ===------------------------------------------------------------------=== #
 
     @always_inline("nodebug")
-    fn __len__(self) -> Int:
+    def __len__(self) -> Int:
         """Returns the length of the array. This is a known constant value.
 
         Returns:

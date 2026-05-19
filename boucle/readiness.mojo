@@ -29,7 +29,7 @@ from std.memory.unsafe_pointer import alloc
 trait ReadinessHandler(Movable, ImplicitlyDestructible):
     """Callback interface for readiness events."""
 
-    fn on_ready(mut self, token: Token, readiness: Readiness):
+    def on_ready(mut self, token: Token, readiness: Readiness):
         ...
 
 
@@ -46,7 +46,7 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
     var _max_events: Int32
     var _handler: Self.Handler
 
-    fn __init__(
+    def __init__(
         out self, var handler: Self.Handler, *, max_events: Int32 = 64
     ) raises:
         self._epfd = epoll_create()
@@ -54,11 +54,11 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
         self._events = alloc[epoll_event](Int(max_events))
         self._handler = handler^
 
-    fn __del__(deinit self):
+    def __del__(deinit self):
         self._events.free()
         close(unsafe_fd=self._epfd)
 
-    fn register(self, fd: Int32, interest: Interest, token: Token) raises:
+    def register(self, fd: Int32, interest: Interest, token: Token) raises:
         """Add a file descriptor to the interest list."""
         var ev = epoll_event(
             events=interest.value | EPOLLRDHUP,
@@ -66,7 +66,7 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
         )
         epoll_ctl(self._epfd, EpollOp.ADD, fd, ev)
 
-    fn modify(self, fd: Int32, interest: Interest, token: Token) raises:
+    def modify(self, fd: Int32, interest: Interest, token: Token) raises:
         """Modify the interest flags for a registered file descriptor."""
         var ev = epoll_event(
             events=interest.value | EPOLLRDHUP,
@@ -74,12 +74,12 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
         )
         epoll_ctl(self._epfd, EpollOp.MOD, fd, ev)
 
-    fn deregister(self, fd: Int32) raises:
+    def deregister(self, fd: Int32) raises:
         """Remove a file descriptor from the interest list."""
         var ev = epoll_event()
         epoll_ctl(self._epfd, EpollOp.DEL, fd, ev)
 
-    fn poll(mut self, *, timeout_ms: Int32 = -1) raises:
+    def poll(mut self, *, timeout_ms: Int32 = -1) raises:
         """Wait for readiness events and invoke handler for each."""
         var n = epoll_wait(
             self._epfd,

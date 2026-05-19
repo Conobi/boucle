@@ -2,7 +2,7 @@ from boucle.readiness_state import Readiness
 from std.testing import assert_true, assert_false
 
 
-fn main() raises:
+def main() raises:
     var r = Readiness(0x001)  # EPOLLIN
     assert_true(r.is_readable())
     assert_false(r.is_writable())

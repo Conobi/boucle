@@ -8,7 +8,7 @@ from std.testing import assert_equal, assert_true
 from std.sys.info import size_of
 
 
-fn main() raises:
+def main() raises:
     # --- SocketAddrV4 ---
     var addr4 = SocketAddrV4(127, 0, 0, 1, port=8080)
     assert_equal(addr4.port, UInt16(8080))

@@ -12,13 +12,13 @@ from boucle._sys.linux.net.syscalls import _socket, _bind, _listen
 
 
 @always_inline
-fn socket(domain: AddrFamily, type: SocketType) raises -> OwnedHandle:
+def socket(domain: AddrFamily, type: SocketType) raises -> OwnedHandle:
     """Creates a socket with default flags and protocol."""
     return _socket(domain, type, SocketFlags(), Protocol())
 
 
 @always_inline
-fn socket(
+def socket(
     domain: AddrFamily, type: SocketType, protocol: Protocol
 ) raises -> OwnedHandle:
     """Creates a socket with the given protocol and default flags."""
@@ -26,7 +26,7 @@ fn socket(
 
 
 @always_inline
-fn socket(
+def socket(
     domain: AddrFamily,
     type: SocketType,
     flags: SocketFlags,
@@ -37,19 +37,19 @@ fn socket(
 
 
 @always_inline
-fn bind[Addr: SocketAddrStor](ref handle: OwnedHandle, ref addr: Addr) raises:
+def bind[Addr: SocketAddrStor](ref handle: OwnedHandle, ref addr: Addr) raises:
     """Binds a socket to the given address (SocketAddrStor variant)."""
     var stor = addr.addr_stor()
     _bind(handle, stor)
 
 
 @always_inline
-fn bind[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
+def bind[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
     """Binds a socket to the given address (SocketAddr variant)."""
     _bind(handle, addr)
 
 
 @always_inline
-fn listen(ref handle: OwnedHandle, backlog: Backlog) raises:
+def listen(ref handle: OwnedHandle, backlog: Backlog) raises:
     """Marks the socket as a passive socket for accepting connections."""
     _listen(handle, backlog)

@@ -146,7 +146,7 @@ struct in_addr(TrivialRegisterPassable):
     var s_addr: __be32
 
     @always_inline
-    fn __init__(out self, s_addr: __be32 = 0):
+    def __init__(out self, s_addr: __be32 = 0):
         self.s_addr = s_addr
 
 
@@ -162,7 +162,7 @@ struct sockaddr_in(TrivialRegisterPassable):
     var _pad1: UInt32
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.sin_family = 0
         self.sin_port = 0
         self.sin_addr_s_addr = 0
@@ -179,7 +179,7 @@ struct in6_addr(TrivialRegisterPassable):
     var d: UInt32
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.a = 0
         self.b = 0
         self.c = 0
@@ -199,7 +199,7 @@ struct sockaddr_in6(TrivialRegisterPassable):
     var sin6_scope_id: __u32
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.sin6_family = 0
         self.sin6_port = 0
         self.sin6_flowinfo = 0
@@ -215,7 +215,7 @@ struct iovec(TrivialRegisterPassable):
     var iov_len: UInt64   # size_t
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.iov_base = 0
         self.iov_len = 0
 
@@ -235,7 +235,7 @@ struct msghdr(TrivialRegisterPassable):
     var _pad1: UInt32           # alignment padding (offsets 52-55)
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.msg_name = 0
         self.msg_namelen = 0
         self._pad0 = 0
@@ -254,7 +254,7 @@ struct cmsghdr(TrivialRegisterPassable):
     var cmsg_type: Int32   # int -- protocol-specific type
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.cmsg_len = 0
         self.cmsg_level = 0
         self.cmsg_type = 0
@@ -268,7 +268,7 @@ struct in_pktinfo(TrivialRegisterPassable):
     var ipi_addr: __be32       # in_addr.s_addr -- destination address
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.ipi_ifindex = 0
         self.ipi_spec_dst = 0
         self.ipi_addr = 0
@@ -284,7 +284,7 @@ struct in6_pktinfo(TrivialRegisterPassable):
     var ipi6_ifindex: UInt32   # unsigned int -- interface index
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.ipi6_addr_a = 0
         self.ipi6_addr_b = 0
         self.ipi6_addr_c = 0

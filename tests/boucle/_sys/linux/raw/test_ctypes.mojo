@@ -11,7 +11,7 @@ from testing import assert_equal
 from std.sys.info import size_of
 
 
-fn main() raises:
+def main() raises:
     assert_equal(size_of[c_char](), 1)
     assert_equal(size_of[c_schar](), 1)
     assert_equal(size_of[c_uchar](), 1)

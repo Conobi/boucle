@@ -8,13 +8,13 @@ struct Token(TrivialRegisterPassable, Equatable):
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt64):
+    def __init__(out self, value: UInt64):
         self.value = value
 
     @always_inline("nodebug")
-    fn __eq__(self, other: Self) -> Bool:
+    def __eq__(self, other: Self) -> Bool:
         return self.value == other.value
 
     @always_inline("nodebug")
-    fn __ne__(self, other: Self) -> Bool:
+    def __ne__(self, other: Self) -> Bool:
         return self.value != other.value

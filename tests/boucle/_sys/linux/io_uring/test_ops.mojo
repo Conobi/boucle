@@ -4,7 +4,7 @@ from std.ffi import external_call
 from std.testing import assert_equal, assert_true
 
 
-fn main() raises:
+def main() raises:
     # Create a pipe
     var pipefd = InlineArray[Int32, 2](fill=0)
     var res = external_call["pipe", Int32](

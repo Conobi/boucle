@@ -39,7 +39,7 @@ comptime CORO_DONE: UInt8 = 3
 comptime DEFAULT_STACK_SIZE: UInt = 65536
 
 # Body function type: receives a mutable CoroYielder, may raise
-comptime CoroBody = fn (mut CoroYielder) raises -> None
+comptime CoroBody = def (mut CoroYielder) thin raises -> None
 
 
 # ── CoroYielder ──────────────────────────────────────────────────────────
@@ -54,10 +54,10 @@ struct CoroYielder:
 
     var _inner: UnsafePointer[_CoroInner, MutExternalOrigin]
 
-    fn __init__(out self, inner: UnsafePointer[_CoroInner, MutExternalOrigin]):
+    def __init__(out self, inner: UnsafePointer[_CoroInner, MutExternalOrigin]):
         self._inner = inner
 
-    fn yield_to_caller(mut self):
+    def yield_to_caller(mut self):
         """Suspend this coroutine and return control to the caller.
 
         Execution resumes from here when the caller calls resume().
@@ -73,7 +73,7 @@ struct CoroYielder:
         # When we return here, the caller called resume() again
         self._inner[].phase = CORO_RUNNING
 
-    fn user_data(self) -> UnsafePointer[NoneType, MutExternalOrigin]:
+    def user_data(self) -> UnsafePointer[NoneType, MutExternalOrigin]:
         """Access the user data pointer passed at CoroHandle creation."""
         return self._inner[].user_data
 
@@ -97,7 +97,7 @@ struct _CoroInner(Movable):
     var has_error: Bool
     var error_msg: String
 
-    fn __init__(
+    def __init__(
         out self,
         body: CoroBody,
         user_data: UnsafePointer[NoneType, MutExternalOrigin],
@@ -129,7 +129,7 @@ struct _CoroInner(Movable):
 # ── Trampoline ───────────────────────────────────────────────────────────
 
 
-fn _coro_trampoline(inner_addr: Int64):
+def _coro_trampoline(inner_addr: Int64):
     """Entry point for new coroutines. Runs on the coroutine stack.
 
     Receives a pointer to _CoroInner via REG_RDI.
@@ -166,7 +166,7 @@ struct CoroHandle(Movable):
 
     var _inner: UnsafePointer[_CoroInner, MutExternalOrigin]
 
-    fn __init__(
+    def __init__(
         out self,
         body: CoroBody,
         user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
@@ -228,7 +228,7 @@ struct CoroHandle(Movable):
     def __init__(out self, *, deinit take: Self):
         self._inner = take._inner
 
-    fn __del__(deinit self):
+    def __del__(deinit self):
         debug_assert(
             self._inner[].phase == CORO_CREATED
             or self._inner[].phase == CORO_DONE,
@@ -246,7 +246,7 @@ struct CoroHandle(Movable):
         self._inner.destroy_pointee()
         self._inner.free()
 
-    fn resume(mut self) raises:
+    def resume(mut self) raises:
         """Resume (or start) the coroutine.
 
         Returns when the body yields or completes.
@@ -265,18 +265,18 @@ struct CoroHandle(Movable):
             self._inner[].has_error = False
             raise self._inner[].error_msg
 
-    fn is_done(self) -> Bool:
+    def is_done(self) -> Bool:
         """True if the coroutine body has returned or raised."""
         return self._inner[].phase == CORO_DONE
 
-    fn can_resume(self) -> Bool:
+    def can_resume(self) -> Bool:
         """True if the coroutine can be resumed (CREATED or SUSPENDED)."""
         return (
             self._inner[].phase == CORO_CREATED
             or self._inner[].phase == CORO_SUSPENDED
         )
 
-    fn reset(
+    def reset(
         mut self,
         body: CoroBody,
         user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
@@ -340,7 +340,7 @@ struct CoroutinePool(Movable):
     var _stack_size: UInt
     var _capacity: Int
 
-    fn __init__(
+    def __init__(
         out self,
         *,
         capacity: Int = 256,
@@ -355,13 +355,13 @@ struct CoroutinePool(Movable):
         self._stack_size = take._stack_size
         self._capacity = take._capacity
 
-    fn __del__(deinit self):
+    def __del__(deinit self):
         for i in range(len(self._free)):
             var ptr = self._free[i]
             ptr.destroy_pointee()
             ptr.free()
 
-    fn acquire(
+    def acquire(
         mut self,
         body: CoroBody,
         user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
@@ -378,7 +378,7 @@ struct CoroutinePool(Movable):
         ptr.init_pointee_move(h^)
         return ptr
 
-    fn release(mut self, ptr: UnsafePointer[CoroHandle, MutAnyOrigin]):
+    def release(mut self, ptr: UnsafePointer[CoroHandle, MutAnyOrigin]):
         """Return a (DONE) `CoroHandle` to the pool. Beyond `capacity`
         idle handles, the surplus is destroyed instead of cached."""
         if len(self._free) >= self._capacity:
@@ -387,6 +387,6 @@ struct CoroutinePool(Movable):
             return
         self._free.append(ptr)
 
-    fn idle_count(self) -> Int:
+    def idle_count(self) -> Int:
         """Number of idle handles currently parked in the pool."""
         return len(self._free)

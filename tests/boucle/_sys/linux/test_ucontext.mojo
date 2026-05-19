@@ -39,7 +39,7 @@ comptime STACK_SIZE = 64 * 1024  # 64KB usable stack
 # They must swap back to the caller context when done.
 
 
-fn _trampoline_write42(args_raw: Int):
+def _trampoline_write42(args_raw: Int):
     """Write 42 to shared memory and swap back.
 
     args_raw -> Int[2]: [caller_ctx_addr, shared_addr].
@@ -59,7 +59,7 @@ fn _trampoline_write42(args_raw: Int):
     # dummy.free() intentionally omitted — unreachable after final swap
 
 
-fn _trampoline_pingpong(args_raw: Int):
+def _trampoline_pingpong(args_raw: Int):
     """Increment a shared counter 3 times, yielding between each.
 
     args_raw -> Int[2]: [caller_ctx_addr, counter_addr].
@@ -93,7 +93,7 @@ fn _trampoline_pingpong(args_raw: Int):
 # --- Tests ---
 
 
-fn test_getcontext() raises:
+def test_getcontext() raises:
     """Getcontext initializes a ucontext_t buffer without crashing."""
     var ctx = alloc_ucontext()
     uc_getcontext(ctx)
@@ -101,7 +101,7 @@ fn test_getcontext() raises:
     free_ucontext(ctx)
 
 
-fn test_ucontext_round_trip() raises:
+def test_ucontext_round_trip() raises:
     """Single swap to trampoline and back validates the full FFI round-trip.
 
     This is the critical risk gate: it proves that getcontext, swapcontext,
@@ -160,7 +160,7 @@ fn test_ucontext_round_trip() raises:
     args.free()
 
 
-fn test_pingpong() raises:
+def test_pingpong() raises:
     """Multiple context switches validate that save/restore is reliable.
 
     The caller and coroutine swap back and forth 3 times, with the
@@ -220,7 +220,7 @@ fn test_pingpong() raises:
     args.free()
 
 
-fn main() raises:
+def main() raises:
     test_getcontext()
     test_ucontext_round_trip()
     test_pingpong()

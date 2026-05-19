@@ -2,7 +2,7 @@ from boucle.net.ip import IpAddrV4, IpAddrV6
 from std.testing import assert_equal
 
 
-fn main() raises:
+def main() raises:
     var v4 = IpAddrV4(127, 0, 0, 1)
     assert_equal(v4.octets[0], UInt8(127))
     assert_equal(v4.octets[1], UInt8(0))

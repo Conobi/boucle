@@ -21,7 +21,7 @@ struct Params(Defaultable, ImplicitlyCopyable, Movable):
     # Life cycle methods
     # ===------------------------------------------------------------------=== #
 
-    fn __init__(out self):
+    def __init__(out self):
         self.flags = IORING_SETUP_NO_SQARRAY
         self._cq_entries = 0
         self.sq_thread_cpu = 0
@@ -34,20 +34,20 @@ struct Params(Defaultable, ImplicitlyCopyable, Movable):
     # ===-------------------------------------------------------------------===#
 
     # TODO: Use NonZeroUInt32 value type.
-    fn cq_entries(mut self, value: UInt32) -> ref [self] Self:
+    def cq_entries(mut self, value: UInt32) -> ref [self] Self:
         self._cq_entries = value
         self.flags |= IORING_SETUP_CQSIZE
         return self
 
-    fn clamp(mut self) -> ref [self] Self:
+    def clamp(mut self) -> ref [self] Self:
         self.flags |= IORING_SETUP_CLAMP
         return self
 
-    fn dontfork(mut self) -> ref [self] Self:
+    def dontfork(mut self) -> ref [self] Self:
         self._dontfork = True
         return self
 
-    fn is_dontfork(self) -> Bool:
+    def is_dontfork(self) -> Bool:
         return self._dontfork
 
 
@@ -59,7 +59,7 @@ struct Entries(TrivialRegisterPassable):
     # Life cycle methods
     # ===------------------------------------------------------------------=== #
 
-    fn __init__(out self, *, sq_entries: UInt32, flags: UInt32, cq_entries_param: UInt32) raises:
+    def __init__(out self, *, sq_entries: UInt32, flags: UInt32, cq_entries_param: UInt32) raises:
         """Compute validated SQ and CQ entry counts.
 
         Args:

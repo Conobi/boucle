@@ -2,7 +2,7 @@ from std.sys._assembly import inlined_assembly
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -28,7 +28,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -55,7 +55,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -83,7 +83,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -112,7 +112,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -142,7 +142,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,
@@ -173,7 +173,7 @@ fn syscall[
 
 
 @always_inline("nodebug")
-fn syscall[
+def syscall[
     nr: UInt64,
     result_type: TrivialRegisterPassable,
     *,

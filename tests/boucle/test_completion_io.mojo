@@ -8,7 +8,7 @@ struct IOTracker(CompletionHandler):
     var results: InlineArray[Int32, 4]
     var count: Int
 
-    fn __init__(out self):
+    def __init__(out self):
         self.results = InlineArray[Int32, 4](fill=0)
         self.count = 0
 
@@ -16,13 +16,13 @@ struct IOTracker(CompletionHandler):
         self.results = take.results
         self.count = take.count
 
-    fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
         if self.count < 4:
             self.results[self.count] = result
         self.count += 1
 
 
-fn main() raises:
+def main() raises:
     # Create pipe
     var pipefd = InlineArray[Int32, 2](fill=0)
     var res = external_call["pipe", Int32](

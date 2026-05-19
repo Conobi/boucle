@@ -3,7 +3,7 @@ from std.testing import assert_true
 from std.ffi import external_call
 
 
-fn main() raises:
+def main() raises:
     # Dup stdin to get a valid fd (using external_call directly to avoid
     # a Mojo 0.26.2 mojopkg crash when importing from multiple submodules).
     var raw = external_call["dup", Int32](Int32(0))

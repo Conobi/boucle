@@ -31,7 +31,7 @@ struct Region(Movable):
     # ===------------------------------------------------------------------=== #
 
     @always_inline
-    fn __init__(out self, *, fd: Int32, offset: UInt64, len: UInt) raises:
+    def __init__(out self, *, fd: Int32, offset: UInt64, len: UInt) raises:
         self.ptr = mmap(
             unsafe_ptr=UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0),
             len=len,
@@ -44,7 +44,7 @@ struct Region(Movable):
         self.len = len
 
     @always_inline
-    fn __init__[
+    def __init__[
         is_shared: Bool = True
     ](out self, *, len: UInt, flags: MapFlags) raises:
         self.ptr = mmap_anonymous(
@@ -58,7 +58,7 @@ struct Region(Movable):
         self.len = len
 
     @always_inline
-    fn __del__(deinit self):
+    def __del__(deinit self):
         try:
             munmap(unsafe_ptr=self.ptr, len=self.len)
         except:
@@ -80,7 +80,7 @@ struct Region(Movable):
 
     @always_inline
     @staticmethod
-    fn private(out self: Self, *, len: UInt, flags: MapFlags) raises:
+    def private(out self: Self, *, len: UInt, flags: MapFlags) raises:
         self = Self.__init__[is_shared=False](len=len, flags=flags)
 
     # ===-------------------------------------------------------------------===#
@@ -88,11 +88,11 @@ struct Region(Movable):
     # ===-------------------------------------------------------------------===#
 
     @always_inline
-    fn dontfork(self) raises:
+    def dontfork(self) raises:
         madvise(unsafe_ptr=self.ptr, len=self.len, advice=Advice.DONTFORK)
 
     @always_inline
-    fn unsafe_ptr[
+    def unsafe_ptr[
         T: AnyType
     ](self, *, offset: UInt32, count: UInt32) raises -> UnsafePointer[T, StaticConstantOrigin]:
         constrained[align_of[T]() > 0]()
@@ -106,11 +106,11 @@ struct Region(Movable):
         return ptr.bitcast[T]()
 
     @always_inline
-    fn unsafe_ptr(self) -> UnsafePointer[c_void, StaticConstantOrigin]:
+    def unsafe_ptr(self) -> UnsafePointer[c_void, StaticConstantOrigin]:
         return self.ptr
 
     @always_inline
-    fn unsafe_mut_ptr[T: AnyType](mut self) -> UnsafePointer[T, origin_of(self)]:
+    def unsafe_mut_ptr[T: AnyType](mut self) -> UnsafePointer[T, origin_of(self)]:
         """Returns a mutable pointer to the region memory.
 
         The underlying memory from mmap is always writable; this method
@@ -123,7 +123,7 @@ struct Region(Movable):
         return p8.bitcast[T]()
 
     @always_inline
-    fn addr(self) -> UInt64:
+    def addr(self) -> UInt64:
         return Int(self.ptr)
 
 
@@ -136,11 +136,11 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
     # ===------------------------------------------------------------------=== #
 
     @always_inline
-    fn __init__(out self, *, var sqes_mem: Region, var sq_cq_mem: Region):
+    def __init__(out self, *, var sqes_mem: Region, var sq_cq_mem: Region):
         self.sqes_mem = sqes_mem^
         self.sq_cq_mem = sq_cq_mem^
 
-    fn __init__(out self, sq_entries: UInt32, mut params: IoUringParams) raises:
+    def __init__(out self, sq_entries: UInt32, mut params: IoUringParams) raises:
         entries = Entries(
             sq_entries=sq_entries,
             flags=params.flags.value,
@@ -202,6 +202,6 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
     # ===-------------------------------------------------------------------===#
 
     @always_inline
-    fn dontfork(self) raises:
+    def dontfork(self) raises:
         self.sqes_mem.dontfork()
         self.sq_cq_mem.dontfork()

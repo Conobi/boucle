@@ -5,7 +5,7 @@ from boucle.net.options import (
 from testing import assert_equal, assert_true
 
 
-fn main() raises:
+def main() raises:
     assert_equal(SocketType.STREAM.id, Int32(1))
     assert_equal(SocketType.DGRAM.id, Int32(2))
 

@@ -10,7 +10,7 @@ struct Tracker(CompletionHandler):
     var result: Int32
     var flags: UInt32
 
-    fn __init__(out self):
+    def __init__(out self):
         self.called = False
         self.token = 0
         self.result = 0
@@ -22,7 +22,7 @@ struct Tracker(CompletionHandler):
         self.result = take.result
         self.flags = take.flags
 
-    fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
         self.called = True
         self.token = token
         self.result = result
@@ -37,7 +37,7 @@ struct Tracker(CompletionHandler):
         )
 
 
-fn test_provide_buffers() raises:
+def test_provide_buffers() raises:
     # 4 buffers x 256 bytes = 1024 bytes total
     comptime BUF_SIZE = 256
     comptime BUF_COUNT = 4
@@ -69,5 +69,5 @@ fn test_provide_buffers() raises:
     print("test_provide_buffers PASSED")
 
 
-fn main() raises:
+def main() raises:
     test_provide_buffers()

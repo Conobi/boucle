@@ -21,7 +21,7 @@ struct Counter(Movable):
         self.hits = take.hits
 
 
-fn _body(mut y: CoroYielder) raises -> None:
+def _body(mut y: CoroYielder) raises -> None:
     var udata = y.user_data()
     var ctr = UnsafePointer[Counter, MutAnyOrigin](
         unsafe_from_address=Int(udata)

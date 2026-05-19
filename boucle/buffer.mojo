@@ -11,14 +11,14 @@ struct IOBuffer:
     var len: UInt
 
     @always_inline("nodebug")
-    fn __init__(out self, ref data: List[UInt8]):
+    def __init__(out self, ref data: List[UInt8]):
         self.unsafe_ptr = UnsafePointer[Int8, StaticConstantOrigin](
             unsafe_from_address=Int(data.unsafe_ptr())
         )
         self.len = UInt(len(data))
 
     @always_inline("nodebug")
-    fn __init__(
+    def __init__(
         out self,
         *,
         unsafe_ptr: UnsafePointer[Int8, StaticConstantOrigin],

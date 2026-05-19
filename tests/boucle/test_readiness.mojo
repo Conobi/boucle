@@ -14,7 +14,7 @@ struct Tracker(ReadinessHandler):
     var last_readable: Bool
     var last_writable: Bool
 
-    fn __init__(out self):
+    def __init__(out self):
         self.count = 0
         self.last_token = 0
         self.last_readable = False
@@ -26,14 +26,14 @@ struct Tracker(ReadinessHandler):
         self.last_readable = take.last_readable
         self.last_writable = take.last_writable
 
-    fn on_ready(mut self, token: Token, readiness: Readiness):
+    def on_ready(mut self, token: Token, readiness: Readiness):
         self.count += 1
         self.last_token = token.value
         self.last_readable = readiness.is_readable()
         self.last_writable = readiness.is_writable()
 
 
-fn test_pipe_readable() raises:
+def test_pipe_readable() raises:
     var pipefd = InlineArray[Int32, 2](fill=0)
     var res = external_call["pipe", Int32](
         UnsafePointer(to=pipefd).bitcast[Int32]()
@@ -61,7 +61,7 @@ fn test_pipe_readable() raises:
     close(unsafe_fd=write_fd)
 
 
-fn test_pipe_writable() raises:
+def test_pipe_writable() raises:
     var pipefd = InlineArray[Int32, 2](fill=0)
     var res = external_call["pipe", Int32](
         UnsafePointer(to=pipefd).bitcast[Int32]()
@@ -83,7 +83,7 @@ fn test_pipe_writable() raises:
     close(unsafe_fd=write_fd)
 
 
-fn test_modify_interest() raises:
+def test_modify_interest() raises:
     var pipefd = InlineArray[Int32, 2](fill=0)
     var res = external_call["pipe", Int32](
         UnsafePointer(to=pipefd).bitcast[Int32]()
@@ -106,7 +106,7 @@ fn test_modify_interest() raises:
     close(unsafe_fd=write_fd)
 
 
-fn main() raises:
+def main() raises:
     test_pipe_readable()
     test_pipe_writable()
     test_modify_interest()

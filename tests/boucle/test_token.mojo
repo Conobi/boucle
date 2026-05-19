@@ -2,7 +2,7 @@ from boucle.token import Token
 from std.testing import assert_true, assert_false, assert_equal
 
 
-fn main() raises:
+def main() raises:
     var t1 = Token(0)
     var t2 = Token(42)
     var t3 = Token(42)

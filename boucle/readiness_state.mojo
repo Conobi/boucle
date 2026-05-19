@@ -20,25 +20,25 @@ struct Readiness(TrivialRegisterPassable):
 
     @always_inline("nodebug")
     @implicit
-    fn __init__(out self, value: UInt32):
+    def __init__(out self, value: UInt32):
         self.value = value
 
     @always_inline("nodebug")
-    fn is_readable(self) -> Bool:
+    def is_readable(self) -> Bool:
         return self.value & EPOLLIN != 0
 
     @always_inline("nodebug")
-    fn is_writable(self) -> Bool:
+    def is_writable(self) -> Bool:
         return self.value & EPOLLOUT != 0
 
     @always_inline("nodebug")
-    fn is_error(self) -> Bool:
+    def is_error(self) -> Bool:
         return self.value & EPOLLERR != 0
 
     @always_inline("nodebug")
-    fn is_hup(self) -> Bool:
+    def is_hup(self) -> Bool:
         return self.value & EPOLLHUP != 0
 
     @always_inline("nodebug")
-    fn is_read_hup(self) -> Bool:
+    def is_read_hup(self) -> Bool:
         return self.value & EPOLLRDHUP != 0

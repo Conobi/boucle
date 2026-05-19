@@ -3,7 +3,7 @@ from boucle._sys.linux.errno import Errno
 from std.testing import assert_true, assert_false
 
 
-fn main() raises:
+def main() raises:
     var would_block = IOError(Errno.EAGAIN)
     assert_true(would_block.is_would_block())
     assert_false(would_block.is_connection_reset())

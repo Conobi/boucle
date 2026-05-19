@@ -26,7 +26,7 @@ struct SharedState:
     var coro_saw_result: Int32
     var coro_completed: Bool
 
-    fn __init__(out self):
+    def __init__(out self):
         self.coro_ptr = UnsafePointer[CoroHandle, MutExternalOrigin](
             unsafe_from_address=0
         )
@@ -39,7 +39,7 @@ struct SharedState:
 # ── Coroutine body ────────────────────────────────────────────────────────────
 
 
-fn coro_body(mut y: CoroYielder) raises:
+def coro_body(mut y: CoroYielder) raises:
     """Simulate waiting for an I/O completion.
 
     1. Yield to the caller (pretending to wait for kernel I/O).
@@ -64,7 +64,7 @@ struct IoHandler(CompletionHandler):
 
     var state_ptr: UnsafePointer[SharedState, MutExternalOrigin]
 
-    fn __init__(
+    def __init__(
         out self,
         state_ptr: UnsafePointer[SharedState, MutExternalOrigin],
     ):
@@ -73,7 +73,7 @@ struct IoHandler(CompletionHandler):
     def __init__(out self, *, deinit take: Self):
         self.state_ptr = take.state_ptr
 
-    fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
         self.state_ptr[].io_token = token
         self.state_ptr[].io_result = result
         # Resume the coroutine — it will read io_result and set coro_completed
@@ -88,7 +88,7 @@ struct IoHandler(CompletionHandler):
 # ── Test ──────────────────────────────────────────────────────────────────────
 
 
-fn test_coro_with_completion_loop() raises:
+def test_coro_with_completion_loop() raises:
     # Shared state lives on the stack — both coroutine and handler share it
     # via raw pointers.  The struct must outlive both.
     var state = SharedState()
@@ -132,6 +132,6 @@ fn test_coro_with_completion_loop() raises:
     )
 
 
-fn main() raises:
+def main() raises:
     test_coro_with_completion_loop()
     print("All stackful I/O tests passed.")

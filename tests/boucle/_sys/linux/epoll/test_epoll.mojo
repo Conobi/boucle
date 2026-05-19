@@ -13,7 +13,7 @@ from std.testing import assert_true, assert_equal
 comptime __NR_write = 1
 
 
-fn main() raises:
+def main() raises:
     # Create epoll instance
     var epfd = epoll_create()
     assert_true(epfd > -1)

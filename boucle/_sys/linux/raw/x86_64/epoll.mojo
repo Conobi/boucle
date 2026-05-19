@@ -29,11 +29,11 @@ struct epoll_event(TrivialRegisterPassable):
     var data: UInt64
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.events = 0
         self.data = 0
 
     @always_inline
-    fn __init__(out self, *, events: UInt32, data: UInt64):
+    def __init__(out self, *, events: UInt32, data: UInt64):
         self.events = events
         self.data = data

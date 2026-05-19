@@ -175,7 +175,7 @@ struct io_sqring_offsets(Defaultable, ImplicitlyCopyable, Movable):
     var user_addr: UInt64
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.head = 0
         self.tail = 0
         self.ring_mask = 0
@@ -199,7 +199,7 @@ struct io_cqring_offsets(Defaultable, ImplicitlyCopyable, Movable):
     var user_addr: UInt64
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.head = 0
         self.tail = 0
         self.ring_mask = 0
@@ -218,7 +218,7 @@ struct io_uring_buf(Defaultable, ImplicitlyCopyable, Movable):
     var resv: UInt16
 
     @always_inline
-    fn __init__(out self):
+    def __init__(out self):
         self.addr = 0
         self.len = 0
         self.bid = 0
