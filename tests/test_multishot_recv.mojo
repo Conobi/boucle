@@ -118,8 +118,8 @@ def test_multishot_recv() raises:
     # --- 3. Accept on the listener (blocking) ---
     var server_fd = external_call["accept", Int32](
         listen_fd,
-        UnsafePointer[c_void, StaticConstantOrigin](),
-        UnsafePointer[Int32, StaticConstantOrigin](),
+        UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0),
+        UnsafePointer[Int32, StaticConstantOrigin](unsafe_from_address=0),
     )
     print("server_fd=", server_fd)
     assert_true(Int(server_fd) >= 0, "accept() failed")

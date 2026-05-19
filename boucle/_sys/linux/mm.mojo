@@ -126,7 +126,7 @@ fn mmap_anonymous(
     """
     constrained[is_64bit()]()
 
-    var null_ptr = UnsafePointer[c_void, StaticConstantOrigin]()
+    var null_ptr = UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0)
     var res = syscall[__NR_mmap, UnsafePointer[c_void, StaticConstantOrigin]](
         null_ptr, len, prot, flags | MapFlags(MAP_ANONYMOUS), Int32(-1), UInt64(0)
     )

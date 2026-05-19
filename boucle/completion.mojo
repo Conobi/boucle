@@ -77,11 +77,11 @@ struct BufRing(Movable):
         H2ServerHandler-style consumer before `register_buf_ring`. The
         consumer must move-assign the real BufRing into place before
         any add_buffer / buf_base access."""
-        self.ring_addr = UnsafePointer[UInt8, MutAnyOrigin]()
+        self.ring_addr = UnsafePointer[UInt8, MutAnyOrigin](unsafe_from_address=0)
         self.ring_entries = UInt32(0)
         self.mask = UInt32(0)
         self.bgid = UInt16(0)
-        self.buf_base = UnsafePointer[UInt8, MutAnyOrigin]()
+        self.buf_base = UnsafePointer[UInt8, MutAnyOrigin](unsafe_from_address=0)
         self.buf_size = UInt32(0)
         self.owns_ring = False
 
@@ -453,7 +453,7 @@ struct CompletionLoop[Handler: CompletionHandler]:
         var sq = self._ring.sq()
         if not sq:
             raise "submission queue full (recv_multishot)"
-        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin]()
+        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0)
         _ = Recv(sq.__next__(), fd, null_ptr, UInt(0))
             .ioprio(UInt16(IORING_RECV_MULTISHOT))
             .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)
@@ -763,7 +763,7 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         var sq = self._ring.sq()
         if not sq:
             raise "submission queue full (recv_multishot)"
-        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin]()
+        var null_ptr = UnsafePointer[c_void, StaticConstantOrigin](unsafe_from_address=0)
         _ = Recv(sq.__next__(), fd, null_ptr, UInt(0))
             .ioprio(UInt16(IORING_RECV_MULTISHOT))
             .sqe_flags(IoUringSqeFlags.BUFFER_SELECT)

@@ -169,7 +169,7 @@ struct CoroHandle(Movable):
     fn __init__(
         out self,
         body: CoroBody,
-        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](),
+        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
         stack_size: UInt = DEFAULT_STACK_SIZE,
     ) raises:
         # Allocate stack: guard page + usable
@@ -279,7 +279,7 @@ struct CoroHandle(Movable):
     fn reset(
         mut self,
         body: CoroBody,
-        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](),
+        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
     ) raises:
         """Recycle this coroutine for a new body, reusing its stack and
         ucontext storage. Caller must ensure the coro is CREATED or DONE
@@ -364,7 +364,7 @@ struct CoroutinePool(Movable):
     fn acquire(
         mut self,
         body: CoroBody,
-        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](),
+        user_data: UnsafePointer[NoneType, MutExternalOrigin] = UnsafePointer[NoneType, MutExternalOrigin](unsafe_from_address=0),
     ) raises -> UnsafePointer[CoroHandle, MutAnyOrigin]:
         """Return a `CoroHandle` ready to run `body`. Either pops from
         the free list (fast path, just `reset`) or allocates fresh
