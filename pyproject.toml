@@ -6,12 +6,19 @@ license = "Apache-2.0"
 requires-python = ">=3.11"
 dependencies = [
     "mojox>=0.2",
-    "mojo-compiler==0.26.2.0",
+    "mojo-compiler==1.0.0b1",
 ]
 
 [build-system]
-requires = ["mojox-build>=0.2", "mojo-compiler==0.26.2.0"]
+requires = [
+    "mojox-build>=0.2",
+    "mojo-compiler==1.0.0b1",
+    "mojo-compiler-mojo-libs==1.0.0b1",
+]
 build-backend = "mojox_build"
+
+[tool.uv]
+prerelease = "allow"
 
 [tool.mojox-build]
 packages = ["boucle"]
