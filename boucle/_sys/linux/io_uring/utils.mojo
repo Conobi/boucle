@@ -1,6 +1,6 @@
-from sys.intrinsics import llvm_intrinsic, unlikely
-from sys.info import bit_width_of
-from memory import UnsafePointer
+from std.sys.intrinsics import llvm_intrinsic, unlikely
+from std.sys.info import bit_width_of
+from std.memory import UnsafePointer
 
 
 struct _AddOverflowResult(TrivialRegisterPassable):

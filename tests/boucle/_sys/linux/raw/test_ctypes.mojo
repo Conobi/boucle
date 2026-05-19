@@ -8,7 +8,7 @@ from boucle._sys.linux.raw.ctypes import (
     c_void,
 )
 from testing import assert_equal
-from sys.info import size_of
+from std.sys.info import size_of
 
 
 fn main() raises:

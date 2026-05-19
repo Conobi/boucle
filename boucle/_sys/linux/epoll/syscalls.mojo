@@ -1,6 +1,6 @@
 """Linux epoll syscall wrappers."""
 
-from ffi import external_call
+from std.ffi import external_call
 from boucle._sys.linux.raw.x86_64.epoll import epoll_event
 
 

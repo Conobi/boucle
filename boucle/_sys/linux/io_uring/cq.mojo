@@ -8,7 +8,7 @@ from boucle._sys.linux.io_uring.types import (
     IoUringParams,
 )
 from boucle._sys.linux.utils import _size_eq, _align_eq
-from memory import UnsafePointer
+from std.memory import UnsafePointer
 
 
 struct Cq[type: CQE](Movable, Sized, Boolable):

@@ -4,7 +4,7 @@ Calls libc getcontext/swapcontext via external_call.
 Bypasses makecontext entirely by writing gregs[] directly.
 """
 
-from ffi import external_call
+from std.ffi import external_call
 from std.memory import UnsafePointer, memset
 from std.memory.unsafe_pointer import alloc
 from boucle._sys.linux.raw.x86_64.ucontext import (

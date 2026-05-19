@@ -27,8 +27,8 @@ from boucle._sys.linux.raw.x86_64.io_uring import (
     IORING_OFF_SQ_RING,
     IORING_OFF_SQES,
 )
-from sys.info import size_of
-from sys.intrinsics import unlikely
+from std.sys.info import size_of
+from std.sys.intrinsics import unlikely
 
 
 struct IoUring[

@@ -5,7 +5,7 @@ from boucle._sys.linux.raw.x86_64.net import (
     IPPROTO_TCP, IPPROTO_UDP,
 )
 from testing import assert_equal
-from sys.info import size_of
+from std.sys.info import size_of
 
 
 fn main() raises:

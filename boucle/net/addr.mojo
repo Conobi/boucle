@@ -12,8 +12,8 @@ Traits
 - SocketAddrStorMut          — types that can produce a SocketAddrMut storage
 """
 
-from sys.info import align_of, size_of
-from memory import UnsafePointer
+from std.sys.info import align_of, size_of
+from std.memory import UnsafePointer
 
 from boucle.net.ip import IpAddrV4, IpAddrV6
 from boucle.net.options import AddrFamily

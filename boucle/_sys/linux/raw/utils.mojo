@@ -1,6 +1,6 @@
-from sys.info import is_nvidia_gpu, is_triple, is_64bit as _is_64bit
-from bit import byte_swap
-from memory import UnsafePointer
+from std.sys.info import is_nvidia_gpu, is_triple, is_64bit as _is_64bit
+from std.bit import byte_swap
+from std.memory import UnsafePointer
 
 
 @always_inline("nodebug")

@@ -1,4 +1,4 @@
-from sys._assembly import inlined_assembly
+from std.sys._assembly import inlined_assembly
 
 
 @always_inline("nodebug")

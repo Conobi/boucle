@@ -18,8 +18,8 @@ from boucle._sys.linux.mm import (
     MapFlags,
     Advice,
 )
-from sys.info import align_of, size_of
-from memory import UnsafePointer
+from std.sys.info import align_of, size_of
+from std.memory import UnsafePointer
 
 
 struct Region(Movable):

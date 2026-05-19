@@ -54,7 +54,7 @@ from boucle._sys.linux.raw.x86_64.general import (
 )
 from boucle._sys.linux.raw.x86_64.syscall import syscall
 from boucle._sys.linux.raw.utils import is_64bit
-from memory import UnsafePointer
+from std.memory import UnsafePointer
 
 
 @always_inline

@@ -19,7 +19,7 @@ from boucle._sys.linux.raw.x86_64.io_uring import IORING_RECV_MULTISHOT
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
 from std.memory.unsafe_pointer import alloc as _heap_alloc
-from sys.intrinsics import _RegisterPackType
+from std.sys.intrinsics import _RegisterPackType
 
 
 # ── Buffer ring (IORING_REGISTER_PBUF_RING) ─────────────────────────────

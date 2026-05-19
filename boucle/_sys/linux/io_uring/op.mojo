@@ -10,7 +10,7 @@ from boucle._sys.linux.io_uring.types import (
 )
 from boucle._sys.linux.fd import UnsafeFd, NoFd
 from boucle._sys.linux.raw.ctypes import c_void
-from memory import UnsafePointer
+from std.memory import UnsafePointer
 
 
 @always_inline

@@ -5,7 +5,7 @@ a Mojo 0.26.2 mojopkg deserialization crash when calling through
 multiple internal subpackage layers.
 """
 
-from ffi import external_call
+from std.ffi import external_call
 
 from boucle.handle import RawHandle, OwnedHandle
 from boucle.net.addr import SocketAddr

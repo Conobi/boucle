@@ -1,4 +1,4 @@
-from sys.info import size_of, align_of
+from std.sys.info import size_of, align_of
 
 
 @always_inline("nodebug")
