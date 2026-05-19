@@ -85,7 +85,7 @@ struct BufRing(Movable):
         self.buf_size = UInt32(0)
         self.owns_ring = False
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.ring_addr = take.ring_addr
         self.ring_entries = take.ring_entries
         self.mask = take.mask

@@ -21,7 +21,7 @@ struct OwnedHandle(Movable):
         self._raw = raw
 
     @always_inline("nodebug")
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self._raw = take._raw
 
     @always_inline("nodebug")

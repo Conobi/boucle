@@ -20,7 +20,7 @@ struct Tracker(ReadinessHandler):
         self.last_readable = False
         self.last_writable = False
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.count = take.count
         self.last_token = take.last_token
         self.last_readable = take.last_readable

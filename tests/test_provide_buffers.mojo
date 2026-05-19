@@ -16,7 +16,7 @@ struct Tracker(CompletionHandler):
         self.result = 0
         self.flags = 0
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.called = take.called
         self.token = take.token
         self.result = take.result

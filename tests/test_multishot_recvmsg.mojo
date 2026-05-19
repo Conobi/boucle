@@ -28,7 +28,7 @@ struct Tracker(CompletionHandler):
         self.results = InlineArray[Int32, 8](fill=0)
         self.flags_arr = InlineArray[UInt32, 8](fill=0)
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.call_count = take.call_count
         self.tokens = take.tokens
         self.results = take.results

@@ -109,7 +109,7 @@ struct IoUring[
         self.fd^.__del__()
 
     @always_inline
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         """Moves data of an existing IoUring into a new one.
 
         Args:

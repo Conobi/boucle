@@ -65,7 +65,7 @@ struct Region(Movable):
             pass
 
     @always_inline
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         """Moves data of an existing Region into a new one.
 
         Args:
@@ -188,7 +188,7 @@ struct MemoryMapping[sqe: SQE, cqe: CQE](Movable):
         params.sq_off.user_addr = self.sqes_mem.addr()
 
     @always_inline
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         """Moves data of an existing MemoryMapping into a new one.
 
         Args:

@@ -114,7 +114,7 @@ struct _CoroInner(Movable):
         self.has_error = False
         self.error_msg = String()
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.caller_ctx = take.caller_ctx
         self.coro_ctx = take.coro_ctx
         self.stack_base = take.stack_base
@@ -225,7 +225,7 @@ struct CoroHandle(Movable):
             self._inner.free()
             raise e^
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self._inner = take._inner
 
     fn __del__(deinit self):
@@ -350,7 +350,7 @@ struct CoroutinePool(Movable):
         self._stack_size = stack_size
         self._capacity = capacity
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self._free = take._free^
         self._stack_size = take._stack_size
         self._capacity = take._capacity

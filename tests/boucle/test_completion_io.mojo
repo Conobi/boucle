@@ -12,7 +12,7 @@ struct IOTracker(CompletionHandler):
         self.results = InlineArray[Int32, 4](fill=0)
         self.count = 0
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.results = take.results
         self.count = take.count
 

@@ -70,7 +70,7 @@ struct IoHandler(CompletionHandler):
     ):
         self.state_ptr = state_ptr
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.state_ptr = take.state_ptr
 
     fn on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):

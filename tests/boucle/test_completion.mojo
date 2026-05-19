@@ -12,7 +12,7 @@ struct Counter(CompletionHandler):
         self.last_token = 0
         self.last_result = 0
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.count = take.count
         self.last_token = take.last_token
         self.last_result = take.last_result

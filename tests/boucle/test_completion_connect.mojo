@@ -23,7 +23,7 @@ struct ConnectTracker(CompletionHandler):
         self.last_result = 0
         self.count = 0
 
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         self.last_token = take.last_token
         self.last_result = take.last_result
         self.count = take.count

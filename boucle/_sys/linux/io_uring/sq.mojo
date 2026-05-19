@@ -103,7 +103,7 @@ struct Sq[type: SQE, polling: PollingMode](Movable, Sized, Boolable):
         self.sqe_tail = self._tail[]
 
     @always_inline
-    fn __moveinit__(out self, deinit take: Self):
+    def __init__(out self, *, deinit take: Self):
         """Moves data of an existing Sq into a new one.
 
         Args:
