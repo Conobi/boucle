@@ -7,7 +7,7 @@ IoUringParams, and the three io_uring syscalls (setup, enter, register).
 
 from boucle._sys.linux.raw.ctypes import c_void
 from boucle._sys.linux.fd import UnsafeFd, close
-from boucle._sys.linux.errno import unsafe_decode_result
+from boucle._sys.linux.errno import is_eintr, unsafe_decode_result
 from boucle._sys.linux.utils import _aligned_u64, _align_eq, _size_eq
 from boucle._sys.linux.raw.x86_64.io_uring import (
     IORING_SETUP_IOPOLL,
@@ -1316,14 +1316,26 @@ def io_uring_enter[
         if `to_submit` was zero or if the submission queue was empty.
 
     Raises:
-        `Errno` if the syscall returned an error.
+        `Errno` if the syscall returned an error. The raise message is the
+        negated errno as a string (matching `unsafe_decode_result`'s
+        contract), so callers can recover the errno via `Errno(error=...)`.
+        EINTR is retried transparently and never surfaces.
     """
-    var res = syscall[__NR_io_uring_enter, Scalar[DType.int64]](
-        fd.unsafe_fd(),
-        to_submit,
-        min_complete,
-        flags | arg.flags | Fd.ENTER_FLAGS,
-        arg.arg_unsafe_ptr,
-        arg.size,
-    )
+    var res: Scalar[DType.int64]
+    while True:
+        res = syscall[__NR_io_uring_enter, Scalar[DType.int64]](
+            fd.unsafe_fd(),
+            to_submit,
+            min_complete,
+            flags | arg.flags | Fd.ENTER_FLAGS,
+            arg.arg_unsafe_ptr,
+            arg.size,
+        )
+        if res >= 0:
+            break
+        # Retry transparently if a signal interrupted the syscall — losing
+        # CQEs because SIGCHLD fired is not acceptable in real servers.
+        if is_eintr(res):
+            continue
+        break
     return unsafe_decode_result[DType.uint32](res)

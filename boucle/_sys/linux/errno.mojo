@@ -78,6 +78,16 @@ struct Errno(TrivialRegisterPassable, Writable):
 
 
 @always_inline("nodebug")
+def is_eintr(neg_errno: Scalar[DType.int64]) -> Bool:
+    """True when a syscall returned -EINTR (interrupted by a signal).
+
+    Linux returns negated error numbers; EINTR is errno 4, so the signed
+    syscall result is -4 when the call was interrupted by a signal.
+    """
+    return neg_errno == -Scalar[DType.int64](EINTR)
+
+
+@always_inline("nodebug")
 def _check_for_errors(raw: Scalar[DType.int64]) raises:
     if raw < 0:
         debug_assert(raw >= -4095, "error number out of range")

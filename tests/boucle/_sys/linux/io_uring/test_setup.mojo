@@ -36,4 +36,21 @@ def main() raises:
     )
     assert_equal(Int(result), 0, "io_uring_enter with no work should return 0")
 
+    # --- Test 5: io_uring_enter EINTR-retry wrapper passes through cleanly ---
+    # Regression test for the EINTR-retry loop. We can't easily inject a real
+    # EINTR (would need fork + signal), but exercise the wrapper repeatedly
+    # on an idle ring to confirm the loop terminates with a clean zero result
+    # in the common no-signal case.
+    for _ in range(4):
+        var idle = io_uring_enter(
+            fd,
+            to_submit=UInt32(0),
+            min_complete=UInt32(0),
+            flags=IoUringEnterFlags.GETEVENTS,
+            arg=NO_ENTER_ARG,
+        )
+        assert_equal(
+            Int(idle), 0, "idle io_uring_enter must not raise or spin"
+        )
+
     print("All io_uring setup tests passed.")
