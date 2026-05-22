@@ -15,5 +15,22 @@ def main() raises:
     var empty = Interest()
     assert_false(empty.is_readable())
     assert_false(empty.is_writable())
+    assert_false(empty.is_edge_triggered())
+    assert_false(empty.is_oneshot())
+
+    # Edge-triggered + oneshot round trip — required for HTTP/2/3 fanout.
+    var i = Interest.READABLE | Interest.EDGE_TRIGGERED | Interest.ONESHOT
+    assert_true(i.is_readable())
+    assert_true(i.is_edge_triggered())
+    assert_true(i.is_oneshot())
+    assert_false(i.is_writable())
+
+    # Standalone modifier flags should not look like readable/writable.
+    assert_true(Interest.EDGE_TRIGGERED.is_edge_triggered())
+    assert_false(Interest.EDGE_TRIGGERED.is_readable())
+    assert_false(Interest.EDGE_TRIGGERED.is_writable())
+    assert_true(Interest.ONESHOT.is_oneshot())
+    assert_false(Interest.ONESHOT.is_readable())
+    assert_false(Interest.ONESHOT.is_writable())
 
     print("All interest tests passed.")

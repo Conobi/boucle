@@ -1,3 +1,4 @@
+from std.ffi import external_call
 from boucle._sys.linux.raw.x86_64.errno import (
     EACCES,
     EADDRINUSE,
@@ -19,6 +20,21 @@ from boucle._sys.linux.raw.x86_64.errno import (
     ETIMEDOUT,
     EWOULDBLOCK,
 )
+
+
+@always_inline("nodebug")
+def get_errno() -> Int32:
+    """Reads the thread-local errno set by libc wrappers.
+
+    Use this after an `external_call` to a libc function that signals
+    failure by returning -1 (e.g. `epoll_create1`, `epoll_ctl`,
+    `epoll_wait`). Raw syscalls invoked via `syscall[]` return the
+    negated errno directly in their return value — those callers should
+    use `is_eintr` and `unsafe_decode_result` instead.
+    """
+    return external_call[
+        "__errno_location", UnsafePointer[Int32, MutExternalOrigin]
+    ]()[]
 
 
 struct Errno(TrivialRegisterPassable, Writable):

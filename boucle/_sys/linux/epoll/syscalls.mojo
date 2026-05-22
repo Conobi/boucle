@@ -1,7 +1,16 @@
-"""Linux epoll syscall wrappers."""
+"""Linux epoll syscall wrappers.
+
+Unlike io_uring, the epoll_* functions are libc wrappers (invoked through
+`external_call`), not raw syscalls. On failure they return -1 and set the
+thread-local errno; callers read it via `get_errno()`. `epoll_wait` is
+restartable, so we retry transparently on EINTR — losing a tick because
+SIGCHLD fired is not acceptable for a real event loop.
+"""
 
 from std.ffi import external_call
 from boucle._sys.linux.raw.x86_64.epoll import epoll_event
+from boucle._sys.linux.raw.x86_64.errno import EINTR
+from boucle._sys.linux.errno import get_errno
 
 
 @fieldwise_init
@@ -19,7 +28,7 @@ def epoll_create() raises -> Int32:
     """Creates an epoll instance with CLOEXEC flag."""
     var res = external_call["epoll_create1", Int32](Int32(0x80000))  # O_CLOEXEC
     if res < 0:
-        raise "epoll_create1 failed"
+        raise "epoll_create1 failed with errno=" + String(Int(get_errno()))
     return res
 
 
@@ -35,7 +44,7 @@ def epoll_ctl(
         UnsafePointer(to=event).bitcast[epoll_event](),
     )
     if res < 0:
-        raise "epoll_ctl failed"
+        raise "epoll_ctl failed with errno=" + String(Int(get_errno()))
 
 
 @always_inline
@@ -48,11 +57,16 @@ def epoll_wait(
 ) raises -> Int32:
     """Wait for events on the epoll instance.
 
-    Returns the number of ready file descriptors.
+    Returns the number of ready file descriptors. Retries transparently
+    if interrupted by a signal (EINTR).
     """
-    var res = external_call["epoll_wait", Int32](
-        epfd, events, max_events, timeout
-    )
-    if res < 0:
-        raise "epoll_wait failed"
-    return res
+    while True:
+        var res = external_call["epoll_wait", Int32](
+            epfd, events, max_events, timeout
+        )
+        if res >= 0:
+            return res
+        var e = get_errno()
+        if e == Int32(EINTR):
+            continue
+        raise "epoll_wait failed with errno=" + String(Int(e))

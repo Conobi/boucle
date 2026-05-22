@@ -4,7 +4,12 @@ Declares what I/O events you care about on a resource.
 Used with `ReadinessLoop.register()` to tell the OS what to watch for.
 """
 
-from boucle._sys.linux.raw.x86_64.epoll import EPOLLIN, EPOLLOUT
+from boucle._sys.linux.raw.x86_64.epoll import (
+    EPOLLET,
+    EPOLLIN,
+    EPOLLONESHOT,
+    EPOLLOUT,
+)
 
 
 struct Interest(TrivialRegisterPassable, Defaultable):
@@ -12,6 +17,8 @@ struct Interest(TrivialRegisterPassable, Defaultable):
 
     comptime READABLE = Self(EPOLLIN)
     comptime WRITABLE = Self(EPOLLOUT)
+    comptime EDGE_TRIGGERED = Self(EPOLLET)
+    comptime ONESHOT = Self(EPOLLONESHOT)
 
     var value: UInt32
 
@@ -39,3 +46,11 @@ struct Interest(TrivialRegisterPassable, Defaultable):
     @always_inline("nodebug")
     def is_writable(self) -> Bool:
         return self.value & EPOLLOUT != 0
+
+    @always_inline("nodebug")
+    def is_edge_triggered(self) -> Bool:
+        return self.value & EPOLLET != 0
+
+    @always_inline("nodebug")
+    def is_oneshot(self) -> Bool:
+        return self.value & EPOLLONESHOT != 0
