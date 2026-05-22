@@ -9,7 +9,7 @@ from boucle._sys.linux.raw.ctypes import c_void
 from boucle._sys.linux.fd import UnsafeFd, close
 from boucle._sys.linux.errno import unsafe_decode_result
 from boucle._sys.linux.utils import _aligned_u64, _align_eq, _size_eq
-from boucle._sys.linux.raw.x86_64.io_uring import (
+from boucle._sys.linux.raw import (
     IORING_SETUP_IOPOLL,
     IORING_SETUP_SQPOLL,
     IORING_SETUP_SQ_AFF,
@@ -153,12 +153,12 @@ from boucle._sys.linux.raw.x86_64.io_uring import (
     io_sqring_offsets,
     io_cqring_offsets,
 )
-from boucle._sys.linux.raw.x86_64.general import (
+from boucle._sys.linux.raw import (
     __NR_io_uring_setup,
     __NR_io_uring_register,
     __NR_io_uring_enter,
 )
-from boucle._sys.linux.raw.x86_64.syscall import syscall
+from boucle._sys.linux.raw import syscall
 from boucle._sys.linux.raw.utils import DTypeArray
 from std.memory import UnsafePointer
 

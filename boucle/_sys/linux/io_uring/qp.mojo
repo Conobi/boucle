@@ -23,7 +23,7 @@ from boucle._sys.linux.io_uring.types import (
     io_uring_register,
     io_uring_enter,
 )
-from boucle._sys.linux.raw.x86_64.io_uring import (
+from boucle._sys.linux.raw import (
     IORING_OFF_SQ_RING,
     IORING_OFF_SQES,
 )
