@@ -21,6 +21,10 @@ TESTS=(
     tests/boucle/_sys/linux/io_uring/test_setup.mojo
     tests/boucle/_sys/linux/io_uring/test_nop.mojo
     tests/boucle/_sys/linux/io_uring/test_ops.mojo
+    tests/boucle/_sys/linux/io_uring/test_provide_buffers.mojo
+    tests/boucle/_sys/linux/io_uring/test_register_buf_ring.mojo
+    tests/boucle/_sys/linux/io_uring/test_multishot_recv.mojo
+    tests/boucle/_sys/linux/io_uring/test_multishot_recvmsg.mojo
     tests/boucle/_sys/linux/epoll/test_epoll.mojo
     tests/boucle/_sys/linux/net/test_syscalls.mojo
     tests/boucle/net/test_socket.mojo
@@ -32,6 +36,7 @@ TESTS=(
     tests/boucle/test_readiness.mojo
     tests/boucle/test_stackful.mojo
     tests/boucle/test_stackful_io.mojo
+    tests/boucle/test_coroutine_pool.mojo
 )
 
 cd "$PROJECT_DIR"
