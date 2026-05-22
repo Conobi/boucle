@@ -14,3 +14,6 @@ CLAUDE.md
 
 # Local git backups (e.g. .git.bak.YYYY-MM-DD-*)
 .git.bak.*
+
+# Parallel worktrees (managed by atelier:using-git-worktrees skill)
+.worktrees/
