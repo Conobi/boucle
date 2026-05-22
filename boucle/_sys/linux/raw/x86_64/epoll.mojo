@@ -24,16 +24,30 @@ comptime EPOLLET = 0x80000000
 
 
 struct epoll_event(TrivialRegisterPassable):
-    """Linux epoll_event struct."""
+    """Linux epoll_event struct, packed to 12 bytes on x86_64.
+
+    The kernel UAPI marks this struct __packed__ (no tail padding between
+    `events` and `data`). Splitting the 64-bit `data` field into two 32-bit
+    halves yields the correct 12-byte stride; otherwise Mojo's default
+    alignment pads to 16 and every event past the first is mis-decoded.
+    """
+
     var events: UInt32
-    var data: UInt64
+    var _data_lo: UInt32
+    var _data_hi: UInt32
 
     @always_inline
     def __init__(out self):
         self.events = 0
-        self.data = 0
+        self._data_lo = 0
+        self._data_hi = 0
 
     @always_inline
     def __init__(out self, *, events: UInt32, data: UInt64):
         self.events = events
-        self.data = data
+        self._data_lo = UInt32(data & 0xFFFF_FFFF)
+        self._data_hi = UInt32(data >> 32)
+
+    @always_inline
+    def data(self) -> UInt64:
+        return UInt64(self._data_lo) | (UInt64(self._data_hi) << 32)

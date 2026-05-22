@@ -90,6 +90,6 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
         for i in range(Int(n)):
             var ev = self._events[i]
             self._handler.on_ready(
-                Token(ev.data),
+                Token(ev.data()),
                 Readiness(ev.events),
             )
