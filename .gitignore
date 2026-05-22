@@ -17,3 +17,14 @@ CLAUDE.md
 
 # Parallel worktrees (managed by atelier:using-git-worktrees skill)
 .worktrees/
+
+# Build artifacts
+dist/
+*.whl
+*.tar.gz
+
+# Python tooling
+.venv/
+__pycache__/
+.mypy_cache/
+.ruff_cache/
