@@ -7,7 +7,7 @@ Bypasses makecontext entirely by writing gregs[] directly.
 from std.ffi import external_call
 from std.memory import UnsafePointer, memset
 from std.memory.unsafe_pointer import alloc
-from boucle._sys.linux.raw.x86_64.ucontext import (
+from boucle._sys.linux.raw import (
     UCONTEXT_SIZE,
     UC_STACK_SP_OFFSET,
     UC_STACK_FLAGS_OFFSET,
