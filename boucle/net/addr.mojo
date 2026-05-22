@@ -19,7 +19,7 @@ from boucle.net.ip import IpAddrV4, IpAddrV6
 from boucle.net.options import AddrFamily
 from boucle._sys.linux.raw.ctypes import c_uint
 from boucle._sys.linux.raw.utils import _to_be
-from boucle._sys.linux.raw.x86_64.net import (
+from boucle._sys.linux.raw import (
     __be32,
     sockaddr_in,
     sockaddr_in6,

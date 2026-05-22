@@ -22,7 +22,7 @@ from boucle._sys.linux.mm import (
     MapFlags,
     ProtFlags,
 )
-from boucle._sys.linux.raw.x86_64.ucontext import PAGE_SIZE, UCONTEXT_SIZE
+from boucle._sys.linux.raw import PAGE_SIZE, UCONTEXT_SIZE
 from std.memory import UnsafePointer, memset
 from std.memory.unsafe_pointer import alloc
 from std.testing import assert_equal, assert_true

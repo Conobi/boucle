@@ -1,3 +1,5 @@
+# Intentional direct import of raw.x86_64.*: this test asserts x86_64-specific
+# struct sizes/layouts. Do not migrate to the raw facade.
 from boucle._sys.linux.raw.x86_64.net import (
     sockaddr_in, sockaddr_in6, in_addr, in6_addr,
     iovec, msghdr,

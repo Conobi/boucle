@@ -1,6 +1,6 @@
 from boucle import CompletionLoop, CompletionHandler
 from boucle._sys.linux.raw.ctypes import c_void
-from boucle._sys.linux.raw.x86_64.io_uring import (
+from boucle._sys.linux.raw import (
     IORING_CQE_F_BUFFER,
     IORING_CQE_F_MORE,
     IORING_CQE_BUFFER_SHIFT,

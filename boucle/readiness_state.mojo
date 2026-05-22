@@ -4,7 +4,7 @@ Reports which I/O operations are possible on a resource right now.
 Returned via `ReadinessHandler.on_ready()`.
 """
 
-from boucle._sys.linux.raw.x86_64.epoll import (
+from boucle._sys.linux.raw import (
     EPOLLIN,
     EPOLLOUT,
     EPOLLERR,

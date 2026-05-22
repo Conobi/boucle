@@ -3,7 +3,7 @@ from boucle.interest import Interest
 from boucle.readiness_state import Readiness
 from boucle.token import Token
 from boucle._sys.linux.fd import close
-from boucle._sys.linux.raw.x86_64.syscall import syscall
+from boucle._sys.linux.raw import syscall
 from std.ffi import external_call
 from std.testing import assert_equal, assert_true
 

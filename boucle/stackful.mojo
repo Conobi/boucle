@@ -23,9 +23,9 @@ from boucle._sys.linux.mm import (
     MapFlags,
     ProtFlags,
 )
-from boucle._sys.linux.raw.x86_64.ucontext import PAGE_SIZE
-from boucle._sys.linux.raw.x86_64.syscall import syscall
-from boucle._sys.linux.raw.x86_64.general import __NR_munmap
+from boucle._sys.linux.raw import PAGE_SIZE
+from boucle._sys.linux.raw import syscall
+from boucle._sys.linux.raw import __NR_munmap
 from boucle._sys.linux.raw.ctypes import c_void
 
 

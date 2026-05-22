@@ -4,7 +4,7 @@ Declares what I/O events you care about on a resource.
 Used with `ReadinessLoop.register()` to tell the OS what to watch for.
 """
 
-from boucle._sys.linux.raw.x86_64.epoll import EPOLLIN, EPOLLOUT
+from boucle._sys.linux.raw import EPOLLIN, EPOLLOUT
 
 
 struct Interest(TrivialRegisterPassable, Defaultable):
