@@ -11,3 +11,6 @@ docs/project-context.md
 
 # Local agent guide — kept local
 CLAUDE.md
+
+# Local git backups (e.g. .git.bak.YYYY-MM-DD-*)
+.git.bak.*
