@@ -12,7 +12,7 @@ See `boucle.readiness` for the alternative model.
 """
 
 from boucle._sys.linux.io_uring import IoUring
-from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout, ProvideBuffers
+from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout, ProvideBuffers, AsyncCancel
 from boucle._sys.linux.io_uring.types import IoUringAcceptFlags, IoUringSqeFlags, IoUringBufReg, IoUringRegisterOp
 from boucle._sys.linux.raw.ctypes import c_void
 from boucle._sys.linux.raw.x86_64.io_uring import IORING_RECV_MULTISHOT
@@ -354,6 +354,28 @@ struct CompletionLoop[Handler: CompletionHandler]:
         _ = Timeout(sq.__next__(), ts_ptr).user_data(token)
         self._pending += 1
 
+    def submit_cancel(
+        mut self,
+        token: UInt64,
+        target_user_data: UInt64,
+        flags: UInt32 = 0,
+    ) raises:
+        """Cancel a previously submitted op matched by `target_user_data`.
+
+        The cancel itself produces a CQE with `user_data == token` and either
+        `result == 0` (target was in flight, cancelled) or `result == -ENOENT`
+        (target had already completed). When cancelled in flight, the target
+        op also produces a CQE with `result == -ECANCELED`.
+
+        `flags` accepts `IORING_ASYNC_CANCEL_*` bits (0 = match a single op
+        by `target_user_data`).
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (cancel)"
+        _ = AsyncCancel(sq.__next__(), target_user_data).cancel_flags(flags).user_data(token)
+        self._pending += 1
+
     def provide_buffers(
         mut self,
         buf_base: UnsafePointer[UInt8, MutAnyOrigin],
@@ -687,6 +709,22 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         if not sq:
             raise "submission queue full (timeout)"
         _ = Timeout(sq.__next__(), ts_ptr).user_data(token)
+        self._pending += 1
+
+    def submit_cancel(
+        mut self,
+        token: UInt64,
+        target_user_data: UInt64,
+        flags: UInt32 = 0,
+    ) raises:
+        """Cancel a previously submitted op matched by `target_user_data`.
+
+        See `CompletionLoop.submit_cancel` for semantics.
+        """
+        var sq = self._ring.sq()
+        if not sq:
+            raise "submission queue full (cancel)"
+        _ = AsyncCancel(sq.__next__(), target_user_data).cancel_flags(flags).user_data(token)
         self._pending += 1
 
     def provide_buffers(

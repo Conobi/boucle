@@ -679,6 +679,61 @@ struct Timeout[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
         return self^
 
 
+struct AsyncCancel[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
+    """Cancel a previously submitted op matched by `user_data`.
+
+    The cancel itself produces a CQE: `result == 0` if the target was
+    cancelled in flight, `-ENOENT` if it had already completed. When the
+    target is cancelled, it also produces a CQE with `result == -ECANCELED`.
+
+    `cancel_flags` accepts the kernel's `IORING_ASYNC_CANCEL_*` bits
+    (e.g. `IORING_ASYNC_CANCEL_ALL` to cancel every match, or
+    `IORING_ASYNC_CANCEL_FD` to match by fd instead of user_data — when
+    matching by fd, the fd lives in `sqe.fd`, set via a different builder).
+    The default (0) matches a single op by `target_user_data`.
+    """
+
+    comptime SINCE = 5.5
+
+    var sqe: Pointer[Sqe[Self.type], Self.origin]
+
+    @always_inline
+    def __init__(
+        out self,
+        ref [Self.origin]sqe: Sqe[Self.type],
+        target_user_data: UInt64,
+    ):
+        _prep_rw(
+            sqe,
+            IoUringOp.ASYNC_CANCEL,
+            IoUringFd[False](unsafe_fd=NoFd),
+            target_user_data,
+            0,
+        )
+        self.sqe = Pointer(to=sqe)
+
+    @always_inline("nodebug")
+    def user_data(var self, value: UInt64) -> Self:
+        self.sqe[].user_data = value
+        return self^
+
+    @always_inline("nodebug")
+    def personality(var self, value: UInt16) -> Self:
+        self.sqe[].personality = value
+        return self^
+
+    @always_inline("nodebug")
+    def sqe_flags(var self, flags: IoUringSqeFlags) -> Self:
+        self.sqe[].flags |= flags
+        return self^
+
+    @always_inline("nodebug")
+    def cancel_flags(var self, flags: UInt32) -> Self:
+        """Set `IORING_ASYNC_CANCEL_*` bits (aliased to op_flags slot)."""
+        self.sqe[].op_flags = flags
+        return self^
+
+
 struct ProvideBuffers[type: SQE, origin: MutOrigin](RegisterPassable, Operation):
     """Provide buffers to io_uring for kernel-side buffer selection.
 
