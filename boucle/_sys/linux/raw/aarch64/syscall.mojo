@@ -15,14 +15,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},~{memory}",
+            constraints = "={x0},{x8},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8}",
+            constraints = "={x0},{x8},~{cc}",
             has_side_effect = has_side_effect,
         ](nr)
 
@@ -42,14 +42,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},~{memory}",
+            constraints = "={x0},{x8},0,~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0}",
+            constraints = "={x0},{x8},0,~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0)
 
@@ -70,14 +70,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},~{memory}",
+            constraints = "={x0},{x8},0,{x1},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1}",
+            constraints = "={x0},{x8},0,{x1},~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1)
 
@@ -99,14 +99,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},~{memory}",
+            constraints = "={x0},{x8},0,{x1},{x2},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2}",
+            constraints = "={x0},{x8},0,{x1},{x2},~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2)
 
@@ -129,14 +129,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3},~{memory}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3)
 
@@ -160,14 +160,14 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3},{x4},~{memory}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},{x4},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3, arg4)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3},{x4}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},{x4},~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3, arg4)
 
@@ -192,13 +192,13 @@ def syscall[
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3},{x4},{x5},~{memory}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},{x4},{x5},~{cc},~{memory}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3, arg4, arg5)
     else:
         return inlined_assembly[
             "svc #0",
             result_type,
-            constraints = "={x0},{x8},{x0},{x1},{x2},{x3},{x4},{x5}",
+            constraints = "={x0},{x8},0,{x1},{x2},{x3},{x4},{x5},~{cc}",
             has_side_effect = has_side_effect,
         ](nr, arg0, arg1, arg2, arg3, arg4, arg5)
