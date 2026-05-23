@@ -19,6 +19,14 @@ from boucle._sys.linux.net.socket import (
     bind as _sys_bind,
     listen as _sys_listen,
 )
+from boucle._sys.linux.net.syscalls import _setsockopt, _connect
+from boucle._sys.linux.raw import (
+    SOL_SOCKET,
+    SO_REUSEADDR,
+    SO_REUSEPORT,
+    IPPROTO_IPV6,
+    IPV6_V6ONLY,
+)
 
 
 struct Socket:
@@ -85,6 +93,27 @@ struct Socket:
     def listen(self, backlog: Backlog) raises:
         """Marks the socket as passive for accepting connections."""
         _sys_listen(self._handle, backlog)
+
+    def set_reuse_addr(self, value: Bool = True) raises:
+        """Sets `SO_REUSEADDR` on the socket."""
+        _setsockopt(
+            self._handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR),
+            Int32(1) if value else Int32(0),
+        )
+
+    def set_reuse_port(self, value: Bool = True) raises:
+        """Sets `SO_REUSEPORT` on the socket."""
+        _setsockopt(
+            self._handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT),
+            Int32(1) if value else Int32(0),
+        )
+
+    def set_v6only(self, value: Bool) raises:
+        """Sets `IPV6_V6ONLY` on an IPv6 socket. `False` enables dual-stack."""
+        _setsockopt(
+            self._handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY),
+            Int32(1) if value else Int32(0),
+        )
 
     @always_inline
     def raw(self) -> RawHandle:
