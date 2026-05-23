@@ -6,6 +6,7 @@ to force name resolution through the facade in
 from the facade's re-export list, this test fails to compile.
 """
 
+from boucle._sys import is_aarch64
 from boucle._sys.linux.raw import syscall  # syscall.mojo
 from boucle._sys.linux.raw import __NR_close, __kernel_timespec  # general.mojo
 from boucle._sys.linux.raw import EPOLLIN, epoll_event  # epoll.mojo
@@ -16,6 +17,10 @@ from boucle._sys.linux.raw import UCONTEXT_SIZE, REG_RIP  # ucontext.mojo
 
 
 def main():
+    comptime if is_aarch64:
+        print("SKIP: x86_64-specific assertions")
+        return
+
     # Touch a representative symbol per category to force resolution.
     comptime assert __NR_close == 3, "general.mojo: __NR_close == 3"
     comptime assert EPOLLIN == 0x001, "epoll.mojo: EPOLLIN == 0x001"
