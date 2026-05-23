@@ -1,5 +1,5 @@
 from .utils import _next_power_of_two
-from boucle._sys.linux.raw.x86_64.io_uring import (
+from boucle._sys.linux.raw import (
     IORING_SETUP_CQSIZE,
     IORING_SETUP_CLAMP,
     IORING_SETUP_NO_SQARRAY,

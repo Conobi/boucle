@@ -1,4 +1,4 @@
-from boucle._sys.linux.raw.x86_64.io_uring import (
+from boucle._sys.linux.raw import (
     IORING_SETUP_IOPOLL,
     IORING_SETUP_SQPOLL,
 )

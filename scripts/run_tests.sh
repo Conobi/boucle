@@ -11,6 +11,9 @@ rm -f "$PROJECT_DIR/boucle.mojopkg"
 TESTS=(
     tests/boucle/_sys/linux/raw/test_ctypes.mojo
     tests/boucle/_sys/linux/raw/test_net_structs.mojo
+    tests/boucle/_sys/linux/raw/test_facade.mojo
+    tests/boucle/_sys/test_triple_helpers.mojo
+    tests/boucle/_sys/test_linux_facade.mojo
     tests/boucle/_sys/linux/test_errno.mojo
     tests/boucle/_sys/linux/test_fd.mojo
     tests/boucle/test_handle.mojo

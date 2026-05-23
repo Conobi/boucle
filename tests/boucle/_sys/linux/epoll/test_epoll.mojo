@@ -1,10 +1,10 @@
 from boucle._sys.linux.epoll.syscalls import (
     epoll_create, epoll_ctl, epoll_wait, EpollOp,
 )
-from boucle._sys.linux.raw.x86_64.epoll import (
+from boucle._sys.linux.raw import (
     epoll_event, EPOLLIN,
 )
-from boucle._sys.linux.raw.x86_64.syscall import syscall
+from boucle._sys.linux.raw import syscall
 from boucle._sys.linux.fd import close
 from std.ffi import external_call
 from std.testing import assert_true, assert_equal

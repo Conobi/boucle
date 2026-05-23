@@ -8,8 +8,7 @@ SIGCHLD fired is not acceptable for a real event loop.
 """
 
 from std.ffi import external_call
-from boucle._sys.linux.raw.x86_64.epoll import epoll_event
-from boucle._sys.linux.raw.x86_64.errno import EINTR
+from boucle._sys.linux.raw import epoll_event, EINTR
 from boucle._sys.linux.errno import get_errno
 
 

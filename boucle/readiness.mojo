@@ -17,7 +17,7 @@ from boucle._sys.linux.epoll.syscalls import (
     epoll_wait,
     EpollOp,
 )
-from boucle._sys.linux.raw.x86_64.epoll import epoll_event, EPOLLRDHUP
+from boucle._sys.linux.raw import epoll_event, EPOLLRDHUP
 from boucle._sys.linux.fd import close
 from boucle.interest import Interest
 from boucle.readiness_state import Readiness

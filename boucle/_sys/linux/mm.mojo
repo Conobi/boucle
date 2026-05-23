@@ -1,6 +1,6 @@
 from boucle._sys.linux.raw.ctypes import c_uint, c_void
 from boucle._sys.linux.errno import unsafe_decode_ptr, unsafe_decode_none
-from boucle._sys.linux.raw.x86_64.general import (
+from boucle._sys.linux.raw import (
     __NR_mmap,
     __NR_mprotect,
     __NR_munmap,
@@ -52,7 +52,7 @@ from boucle._sys.linux.raw.x86_64.general import (
     MADV_DONTNEED_LOCKED,
     MADV_COLLAPSE,
 )
-from boucle._sys.linux.raw.x86_64.syscall import syscall
+from boucle._sys.linux.raw import syscall
 from boucle._sys.linux.raw.utils import is_64bit
 from std.memory import UnsafePointer
 
