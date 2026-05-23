@@ -10,7 +10,12 @@ from boucle._sys.linux.raw import (
     SO_REUSEPORT,
     IPPROTO_IPV6,
     IPV6_V6ONLY,
+    EAGAIN,
 )
+
+
+comptime SOCK_NONBLOCK = Int32(2048)
+comptime SOCK_CLOEXEC = Int32(524288)
 
 
 def _getsockopt_int(ref s: Socket, level: Int32, optname: Int32) raises -> Int32:
@@ -47,12 +52,32 @@ def _check_listener_opts(ref s: Socket) raises:
     assert_equal(_getsockopt_int(s, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY)), 0)
 
 
+def _assert_in_listen_state(ref s: Socket) raises:
+    # accept4 on a listening socket with no pending connection returns -1
+    # with errno=EAGAIN. A non-LISTEN socket returns -1 with errno=EINVAL.
+    var null_addr = UnsafePointer[Int8, StaticConstantOrigin](
+        unsafe_from_address=0
+    )
+    var null_len = UnsafePointer[UInt32, StaticConstantOrigin](
+        unsafe_from_address=0
+    )
+    var res = external_call["accept4", Int32](
+        s.raw(), null_addr, null_len, SOCK_NONBLOCK | SOCK_CLOEXEC,
+    )
+    assert_equal(Int(res), -1)
+    var en = external_call[
+        "__errno_location", UnsafePointer[Int32, MutAnyOrigin]
+    ]()
+    assert_equal(Int(en[]), EAGAIN)
+
+
 def main() raises:
     var tcp = Socket.tcp_listener_v6(0)
     assert_true(tcp.raw() > -1)
     _check_listener_opts(tcp)
     var tcp_port = _getsockname_port(tcp)
     assert_true(tcp_port != 0)
+    _assert_in_listen_state(tcp)
 
     var udp = Socket.udp_listener_v6(0)
     assert_true(udp.raw() > -1)
