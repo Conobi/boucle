@@ -16,6 +16,7 @@ TESTS=(
     tests/boucle/_sys/test_linux_facade.mojo
     tests/boucle/_sys/linux/test_errno.mojo
     tests/boucle/_sys/linux/test_fd.mojo
+    tests/boucle/test_ctypes_reexports.mojo
     tests/boucle/test_handle.mojo
     tests/boucle/test_token.mojo
     tests/boucle/test_error.mojo
