@@ -27,9 +27,23 @@ from std.memory.unsafe_pointer import alloc
 
 
 trait ReadinessHandler(Movable, ImplicitlyDestructible):
-    """Callback interface for readiness events."""
+    """Callback interface for readiness events.
 
-    def on_ready(mut self, token: Token, readiness: Readiness):
+    The handler receives an unsafe pointer to the owning loop so it
+    can self-deregister, modify interest, or rearm in oneshot mode.
+
+    Safety contract: the pointer is valid only for the duration of the
+    `on_ready` call. Do not store it. Do not pass it to other threads.
+    The loop owns the handler, so passing `mut loop: ReadinessLoop[Self]`
+    would alias with `mut self` — hence the pointer indirection.
+    """
+
+    def on_ready(
+        mut self,
+        loop: UnsafePointer[ReadinessLoop[Self], MutExternalOrigin],
+        token: Token,
+        readiness: Readiness,
+    ):
         ...
 
 
@@ -89,7 +103,15 @@ struct ReadinessLoop[Handler: ReadinessHandler]:
         )
         for i in range(Int(n)):
             var ev = self._events[i]
+            # Construct a loop pointer with an unconstrained origin so it
+            # doesn't alias with the `mut self._handler` borrow below.
+            # Safety: the pointer is valid only for the duration of the
+            # on_ready call; the loop outlives the handler invocation.
+            var loop_ptr = UnsafePointer[Self, MutExternalOrigin](
+                unsafe_from_address=Int(UnsafePointer(to=self))
+            )
             self._handler.on_ready(
+                loop_ptr,
                 Token(ev.data()),
                 Readiness(ev.events),
             )

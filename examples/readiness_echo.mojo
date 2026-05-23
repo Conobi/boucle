@@ -43,7 +43,12 @@ struct EchoHandler(ReadinessHandler):
         self.bytes_read = take.bytes_read
         self.buf = take.buf
 
-    def on_ready(mut self, token: Token, readiness: Readiness):
+    def on_ready(
+        mut self,
+        loop: UnsafePointer[ReadinessLoop[Self], MutExternalOrigin],
+        token: Token,
+        readiness: Readiness,
+    ):
         self.got_event = True
         if readiness.is_readable():
             # syscall 0 == read(2) on x86_64
