@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -20,8 +20,5 @@ jobs:
       - name: Build boucle.mojopkg
         run: uv run -- bash scripts/build.sh
 
-      # ubuntu-22.04 ships Linux 5.15. Some io_uring multishot tests need >=5.19
-      # and may fail here. If that becomes a recurring problem, either bump the
-      # runner image or gate the affected tests on kernel version.
       - name: Run tests
         run: uv run -- bash scripts/run_tests.sh
