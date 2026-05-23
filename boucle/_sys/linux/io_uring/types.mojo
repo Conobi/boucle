@@ -1157,10 +1157,13 @@ struct IoUringRsrcUpdate(TrivialRegisterPassable, AsRegisterArg, Defaultable):
         ref [origin] self, *, unsafe_opcode: IoUringRegisterOp
     ) -> RegisterArg[origin]:
         _aligned_u64[Self]()
+        # Bind &self first: inlining UnsafePointer(to=self) into the
+        # constructor arg list risks losing the stack address mid-marshal.
+        var self_p = UnsafePointer(to=self)
         return RegisterArg[origin](
             opcode=unsafe_opcode,
             arg_unsafe_ptr=UnsafePointer[c_void, StaticConstantOrigin](
-                unsafe_from_address=Int(UnsafePointer(to=self))
+                unsafe_from_address=Int(self_p)
             ),
             nr_args=1,
         )
@@ -1207,10 +1210,13 @@ struct IoUringBufReg(AsRegisterArg, Defaultable, ImplicitlyCopyable, Movable):
     ) -> RegisterArg[origin]:
         _size_eq[Self, 40]()
         _align_eq[Self, 8]()
+        # Bind &self first: inlining UnsafePointer(to=self) into the
+        # constructor arg list risks losing the stack address mid-marshal.
+        var self_p = UnsafePointer(to=self)
         return RegisterArg[origin](
             opcode=unsafe_opcode,
             arg_unsafe_ptr=UnsafePointer[c_void, StaticConstantOrigin](
-                unsafe_from_address=Int(UnsafePointer(to=self))
+                unsafe_from_address=Int(self_p)
             ),
             nr_args=1,
         )
@@ -1248,8 +1254,11 @@ def io_uring_setup[
     """
     params.flags |= OwnedFd[is_registered].SETUP_FLAGS
 
+    # Bind the &params local first: inlining UnsafePointer(to=params) into the
+    # syscall arg list can let the stack slot be clobbered during marshaling.
+    var params_p = UnsafePointer(to=params)
     var res = syscall[__NR_io_uring_setup, Scalar[DType.int64]](
-        sq_entries, UnsafePointer(to=params)
+        sq_entries, params_p
     )
     return OwnedFd[is_registered](
         unsafe_fd=unsafe_decode_result[DType.int32](res)
