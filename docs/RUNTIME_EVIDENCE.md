@@ -47,6 +47,49 @@ STATUS: 200
 body: Hello, H3!
 ```
 
+## Linux aarch64 — qemu-system + real arm64 kernel
+
+Host x86_64 Manjaro, `qemu-system-aarch64` 11.0.0, TCG (no KVM cross-arch).
+
+VM: Ubuntu 24.04.4 arm64, kernel `Linux 6.8.0-117-generic aarch64 GNU/Linux`,
+native arm64 syscall ABI, full io_uring support.
+
+Build: navette `hello_h1_server` built inside the VM as a native aarch64 ELF.
+`scripts/build.sh` auto-detected `uname -m == aarch64` and routed through
+`boucle/_sys/linux/raw/aarch64/*` via the build-time facade substitution.
+
+Transport proof — `strace` on the running server:
+
+```
+io_uring_enter(0, 0, 1, IORING_ENTER_GETEVENTS|IORING_ENTER_REGISTERED_RING, NULL, 0)
+```
+
+That's `__NR_io_uring_enter == 426` on aarch64 (asm-generic UAPI),
+dispatched via Boucle's `svc #0` path with `x8` carrying the syscall
+number. Real io_uring on a real arm64 kernel.
+
+Host-side `curl` through qemu user-mode hostfwd:
+
+```
+$ curl -si http://127.0.0.1:18080/
+HTTP/1.1 200
+content-type: text/plain
+content-length: 11
+
+Hello, H1!
+```
+
+Stable across 5 consecutive requests, ~2-5 ms each.
+
+### h2 / h3 on aarch64
+
+`navette/lib/librustls_mojo.so` and `libcompress_mojo.so` are pre-built
+x86_64 only. Arm64 variants require `cargo build --target
+aarch64-unknown-linux-gnu` on the navette Rust crates — orthogonal to
+Boucle's I/O surface. The Boucle aarch64 dispatch is comprehensively
+exercised by the h1 case above (io_uring + sockaddr + syscall ABI);
+extending to h2/h3 is navette-side cross-compilation work.
+
 ## How to reproduce
 
 These transcripts come from the companion `navette` / harness work that
