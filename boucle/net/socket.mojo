@@ -86,6 +86,47 @@ struct Socket:
             )
         )
 
+    @staticmethod
+    def tcp_listener_v6(port: UInt16, *, backlog: Int32 = 1024) raises -> Self:
+        """Creates a dual-stack TCP listener bound to `[::]:port`.
+
+        Sets `SO_REUSEADDR`, `SO_REUSEPORT`, and clears `IPV6_V6ONLY` so
+        the listener accepts both IPv6 and IPv4-mapped connections.
+        """
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.STREAM,
+            SocketFlags.NONBLOCK | SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR), Int32(1))
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT), Int32(1))
+        _setsockopt(handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY), Int32(0))
+        var addr = SocketAddrV6(0, 0, 0, 0, 0, 0, 0, 0, port=port)
+        _sys_bind(handle, addr)
+        _sys_listen(handle, Backlog(backlog))
+        return Self(handle^)
+
+    @staticmethod
+    def udp_listener_v6(port: UInt16) raises -> Self:
+        """Creates a dual-stack UDP listener bound to `[::]:port`.
+
+        Sets `SO_REUSEADDR`, `SO_REUSEPORT`, and clears `IPV6_V6ONLY` so
+        the socket receives both IPv6 and IPv4-mapped datagrams.
+        """
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.DGRAM,
+            SocketFlags.NONBLOCK | SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR), Int32(1))
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT), Int32(1))
+        _setsockopt(handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY), Int32(0))
+        var addr = SocketAddrV6(0, 0, 0, 0, 0, 0, 0, 0, port=port)
+        _sys_bind(handle, addr)
+        return Self(handle^)
+
     def bind[Addr: SocketAddrStor](self, ref addr: Addr) raises:
         """Binds the socket to the given address."""
         _sys_bind(self._handle, addr)
