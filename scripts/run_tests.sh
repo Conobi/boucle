@@ -4,6 +4,42 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Resolve target arch: BOUCLE_TARGET_ARCH overrides; otherwise map `uname -m`.
+detect_arch() {
+    if [ -n "${BOUCLE_TARGET_ARCH:-}" ]; then
+        echo "$BOUCLE_TARGET_ARCH"
+        return
+    fi
+    case "$(uname -m)" in
+        x86_64|amd64) echo "x86_64" ;;
+        aarch64|arm64) echo "aarch64" ;;
+        *) echo "x86_64" ;;
+    esac
+}
+
+ARCH="$(detect_arch)"
+FACADE="$PROJECT_DIR/boucle/_sys/linux/raw/__init__.mojo"
+
+restore_facade() {
+    if [ -n "${_BOUCLE_FACADE_BACKUP:-}" ] && [ -f "$_BOUCLE_FACADE_BACKUP" ]; then
+        mv -f "$_BOUCLE_FACADE_BACKUP" "$FACADE"
+        unset _BOUCLE_FACADE_BACKUP
+    fi
+}
+trap restore_facade EXIT INT TERM
+
+if [ "$ARCH" = "aarch64" ]; then
+    _BOUCLE_FACADE_BACKUP="$(mktemp -t boucle-facade.XXXXXX)"
+    export _BOUCLE_FACADE_BACKUP
+    cp "$FACADE" "$_BOUCLE_FACADE_BACKUP"
+    sed -i \
+        -e '/# ARCH_SLOT_START/,/# ARCH_SLOT_END/ s|from boucle\._sys\.linux\.raw\.x86_64|from boucle._sys.linux.raw.aarch64|g' \
+        "$FACADE"
+elif [ "$ARCH" != "x86_64" ]; then
+    echo "Unsupported BOUCLE_TARGET_ARCH: $ARCH" >&2
+    exit 1
+fi
+
 # Avoid stale-package gotcha: mojo run -I . picks up boucle.mojopkg ahead
 # of source. Wipe it so tests always see the current source.
 rm -f "$PROJECT_DIR/boucle.mojopkg"
@@ -12,6 +48,7 @@ TESTS=(
     tests/boucle/_sys/linux/raw/test_ctypes.mojo
     tests/boucle/_sys/linux/raw/test_net_structs.mojo
     tests/boucle/_sys/linux/raw/test_facade.mojo
+    tests/boucle/_sys/linux/raw/test_aarch64_syscall_numbers.mojo
     tests/boucle/_sys/test_triple_helpers.mojo
     tests/boucle/_sys/test_linux_facade.mojo
     tests/boucle/_sys/linux/test_errno.mojo

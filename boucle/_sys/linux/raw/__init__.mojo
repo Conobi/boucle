@@ -24,6 +24,7 @@ configuration). The arch predicates `is_x86_64` / `is_aarch64` from
 branch inside a function body, where `comptime if` is supported.
 """
 
+# ARCH_SLOT_START — DO NOT EDIT. scripts/build.sh substitutes the arch name on the import lines below.
 from boucle._sys.linux.raw.x86_64.syscall import syscall
 
 from boucle._sys.linux.raw.x86_64.general import (
@@ -595,3 +596,4 @@ from boucle._sys.linux.raw.x86_64.ucontext import (
     REG_EFL,
     PAGE_SIZE,
 )
+# ARCH_SLOT_END

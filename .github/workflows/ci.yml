@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  build-and-test-x86_64:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +17,35 @@ jobs:
       - name: Sync dependencies
         run: uv sync
 
-      - name: Build boucle.mojopkg
+      - name: Build boucle.mojopkg (x86_64)
+        env:
+          BOUCLE_TARGET_ARCH: x86_64
         run: uv run -- bash scripts/build.sh
 
-      - name: Run tests
+      - name: Run tests (x86_64)
+        env:
+          BOUCLE_TARGET_ARCH: x86_64
         run: uv run -- bash scripts/run_tests.sh
+
+  build-and-test-aarch64:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and test under aarch64 qemu
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: aarch64
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y curl ca-certificates bash
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            ln -sf /root/.local/bin/uv /usr/local/bin/uv
+          env: |
+            BOUCLE_TARGET_ARCH: aarch64
+          run: |
+            uv sync
+            bash scripts/build.sh
+            bash scripts/run_tests.sh
