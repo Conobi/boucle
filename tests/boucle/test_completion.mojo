@@ -1,6 +1,9 @@
 from boucle.completion import CompletionLoop, CompletionHandler
+from boucle._sys.linux.raw import IORING_CQE_F_MORE
+from boucle._sys.linux.raw.ctypes import c_void
 from boucle.handle import RawHandle
 from std.ffi import external_call
+from std.memory import UnsafePointer
 from std.testing import assert_equal, assert_true
 
 
@@ -134,9 +137,113 @@ def test_submit_cancel_cancels_pending_recv() raises:
     _ = external_call["close", Int32](write_fd)
 
 
+struct MultishotRecorder(CompletionHandler):
+    """Records CQE flags so the test can check IORING_CQE_F_MORE was set."""
+    var count: Int
+    var saw_more: Int  # number of CQEs with IORING_CQE_F_MORE set
+    var saw_terminal: Int  # number of CQEs with IORING_CQE_F_MORE cleared
+
+    def __init__(out self):
+        self.count = 0
+        self.saw_more = 0
+        self.saw_terminal = 0
+
+    def __init__(out self, *, deinit take: Self):
+        self.count = take.count
+        self.saw_more = take.saw_more
+        self.saw_terminal = take.saw_terminal
+
+    def on_complete(mut self, token: UInt64, result: Int32, flags: UInt32):
+        self.count += 1
+        if (flags & UInt32(IORING_CQE_F_MORE)) != 0:
+            self.saw_more += 1
+        else:
+            self.saw_terminal += 1
+
+
+def test_accept_multishot_pending_no_underflow() raises:
+    """Multishot accept produces multiple CQEs per submission; only the
+    terminal CQE (F_MORE cleared) must retire the op. Verifies _pending
+    doesn't underflow after intermediate F_MORE-bearing CQEs.
+    """
+    comptime AF_INET6 = 10
+    comptime SOCK_STREAM = 1
+
+    # Listener on [::1]:0
+    var listen_fd = external_call["socket", Int32](
+        Int32(AF_INET6), Int32(SOCK_STREAM), Int32(0)
+    )
+    assert_true(Int(listen_fd) >= 0, "socket() failed")
+
+    var addr = InlineArray[UInt8, 28](fill=0)
+    addr[0] = UInt8(AF_INET6)
+    addr[8 + 15] = UInt8(1)  # ::1
+    var addr_ptr = UnsafePointer(to=addr).bitcast[c_void]()
+    var bind_res = external_call["bind", Int32](
+        listen_fd, addr_ptr, Int32(28)
+    )
+    assert_equal(Int(bind_res), 0)
+    var listen_res = external_call["listen", Int32](listen_fd, Int32(4))
+    assert_equal(Int(listen_res), 0)
+
+    # Read the ephemeral port back.
+    var bound = InlineArray[UInt8, 28](fill=0)
+    var bound_len = Int32(28)
+    var gn_res = external_call["getsockname", Int32](
+        listen_fd,
+        UnsafePointer(to=bound).bitcast[c_void](),
+        UnsafePointer(to=bound_len).bitcast[Int32](),
+    )
+    assert_equal(Int(gn_res), 0)
+    var port_hi = bound[2]
+    var port_lo = bound[3]
+
+    var loop = CompletionLoop(MultishotRecorder(), sq_entries=8)
+    loop.submit_accept_multishot(RawHandle(Int(listen_fd)), token=99)
+    assert_equal(Int(loop._pending), 1)
+
+    # Open three clients in sequence and drain each accept CQE.
+    for _ in range(3):
+        var client_fd = external_call["socket", Int32](
+            Int32(AF_INET6), Int32(SOCK_STREAM), Int32(0)
+        )
+        assert_true(Int(client_fd) >= 0)
+        var dest = InlineArray[UInt8, 28](fill=0)
+        dest[0] = UInt8(AF_INET6)
+        dest[2] = port_hi
+        dest[3] = port_lo
+        dest[8 + 15] = UInt8(1)
+        var cr = external_call["connect", Int32](
+            client_fd,
+            UnsafePointer(to=dest).bitcast[c_void](),
+            Int32(28),
+        )
+        assert_equal(Int(cr), 0)
+
+        loop.poll(wait_nr=1)
+        _ = external_call["close", Int32](client_fd)
+
+    # We received at least three multishot CQEs. Each carried F_MORE since the
+    # accept op is still armed. _pending must remain 1 (no terminal CQE yet).
+    assert_true(
+        loop._handler.saw_more >= 3,
+        "expected >=3 F_MORE CQEs, got " + String(loop._handler.saw_more),
+    )
+    assert_equal(Int(loop._handler.saw_terminal), 0)
+    assert_equal(
+        Int(loop._pending),
+        1,
+        "multishot accept must keep _pending=1 across F_MORE CQEs; was "
+        + String(Int(loop._pending)),
+    )
+
+    _ = external_call["close", Int32](listen_fd)
+
+
 def main() raises:
     test_nop_single()
     test_nop_multiple()
     test_nop_batched()
     test_submit_cancel_cancels_pending_recv()
+    test_accept_multishot_pending_no_underflow()
     print("All completion loop tests passed.")

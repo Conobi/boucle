@@ -551,10 +551,12 @@ struct CompletionLoop[Handler: CompletionHandler]:
         var cq = self._ring.cq(wait_nr=0)
         while cq:
             var cqe = cq.__next__()
-            self._handler.on_complete(
-                cqe.user_data, cqe.res, UInt32(cqe.flags.value)
-            )
-            self._pending -= 1
+            var flags = UInt32(cqe.flags.value)
+            self._handler.on_complete(cqe.user_data, cqe.res, flags)
+            # Multishot ops produce multiple CQEs per submission. Only the
+            # terminal CQE (flag IORING_CQE_F_MORE cleared) retires the op.
+            if (flags & IORING_CQE_F_MORE) == 0:
+                self._pending -= 1
         cq^.__del__()
 
     def run(mut self) raises:
@@ -824,10 +826,12 @@ struct BatchCompletionLoop[Handler: BatchCompletionHandler]:
         var cq = self._ring.cq(wait_nr=0)
         while cq:
             var cqe = cq.__next__()
-            self._handler.on_complete(
-                cqe.user_data, cqe.res, UInt32(cqe.flags.value)
-            )
-            self._pending -= 1
+            var flags = UInt32(cqe.flags.value)
+            self._handler.on_complete(cqe.user_data, cqe.res, flags)
+            # Multishot ops produce multiple CQEs per submission. Only the
+            # terminal CQE (flag IORING_CQE_F_MORE cleared) retires the op.
+            if (flags & IORING_CQE_F_MORE) == 0:
+                self._pending -= 1
         cq^.__del__()
         self._handler.on_flush()
 
