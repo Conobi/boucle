@@ -6,7 +6,7 @@ CLOEXEC flags by default.
 """
 
 from boucle.handle import RawHandle, OwnedHandle
-from boucle.net.addr import SocketAddrStor
+from boucle.net.addr import SocketAddrStor, SocketAddrV4, SocketAddrV6
 from boucle.net.options import (
     AddrFamily,
     SocketType,
@@ -114,6 +114,63 @@ struct Socket:
             self._handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY),
             Int32(1) if value else Int32(0),
         )
+
+    def connect[Addr: SocketAddrStor](self, ref addr: Addr) raises:
+        """Blocking `connect(2)` to the given address."""
+        var stor = addr.addr_stor()
+        _connect(self._handle, stor)
+
+    @staticmethod
+    def tcp_connect(ref addr: SocketAddrV4) raises -> Self:
+        """Blocking TCP client to an IPv4 address."""
+        var handle = _sys_socket(
+            AddrFamily.INET,
+            SocketType.STREAM,
+            SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def tcp_connect(ref addr: SocketAddrV6) raises -> Self:
+        """Blocking TCP client to an IPv6 address."""
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.STREAM,
+            SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def udp_connect(ref addr: SocketAddrV4) raises -> Self:
+        """Blocking UDP client to an IPv4 address (sets default peer)."""
+        var handle = _sys_socket(
+            AddrFamily.INET,
+            SocketType.DGRAM,
+            SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def udp_connect(ref addr: SocketAddrV6) raises -> Self:
+        """Blocking UDP client to an IPv6 address (sets default peer)."""
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.DGRAM,
+            SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
 
     @always_inline
     def raw(self) -> RawHandle:

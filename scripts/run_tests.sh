@@ -37,6 +37,7 @@ TESTS=(
     tests/boucle/_sys/linux/net/test_syscalls.mojo
     tests/boucle/net/test_socket.mojo
     tests/boucle/net/test_socket_setopt.mojo
+    tests/boucle/net/test_socket_connect.mojo
     tests/boucle/test_completion_reexports.mojo
     tests/boucle/test_completion.mojo
     tests/boucle/test_completion_io.mojo
