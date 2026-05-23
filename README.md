@@ -1,4 +1,4 @@
-![CI](https://github.com/<owner>/boucle/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Conobi/boucle/actions/workflows/ci.yml/badge.svg)
 
 # Boucle
 

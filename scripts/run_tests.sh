@@ -4,6 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Avoid stale-package gotcha: mojo run -I . picks up boucle.mojopkg ahead
+# of source. Wipe it so tests always see the current source.
+rm -f "$PROJECT_DIR/boucle.mojopkg"
+
 TESTS=(
     tests/boucle/_sys/linux/raw/test_ctypes.mojo
     tests/boucle/_sys/linux/raw/test_net_structs.mojo
