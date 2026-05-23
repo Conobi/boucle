@@ -23,6 +23,7 @@ TESTS=(
     tests/boucle/test_buffer.mojo
     tests/boucle/net/test_options.mojo
     tests/boucle/net/test_ip.mojo
+    tests/boucle/net/test_ip_parse.mojo
     tests/boucle/net/test_addr.mojo
     tests/boucle/_sys/linux/test_mm.mojo
     tests/boucle/_sys/linux/test_ucontext.mojo
