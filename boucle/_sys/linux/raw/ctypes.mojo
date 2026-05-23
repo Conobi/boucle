@@ -12,3 +12,5 @@ comptime c_ulonglong = UInt64
 comptime c_float = Float32
 comptime c_double = Float64
 comptime c_void = Int8
+comptime c_size_t = UInt64
+comptime c_ssize_t = Int64

@@ -15,7 +15,12 @@ from boucle._sys.linux.io_uring import IoUring
 from boucle._sys.linux.io_uring.op import Nop, Read, Write, Recv, Send, Accept, Connect, RecvMsg, SendMsg, Timeout, ProvideBuffers, AsyncCancel
 from boucle._sys.linux.io_uring.types import IoUringAcceptFlags, IoUringSqeFlags, IoUringBufReg, IoUringRegisterOp
 from boucle._sys.linux.raw.ctypes import c_void
-from boucle._sys.linux.raw import IORING_RECV_MULTISHOT
+from boucle._sys.linux.raw import (
+    IORING_RECV_MULTISHOT,
+    IORING_CQE_F_BUFFER,
+    IORING_CQE_F_MORE,
+    IORING_CQE_BUFFER_SHIFT,
+)
 from boucle.handle import RawHandle
 from std.memory import UnsafePointer
 from std.memory.unsafe_pointer import alloc as _heap_alloc

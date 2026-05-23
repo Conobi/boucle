@@ -53,12 +53,15 @@ TESTS=(
     tests/boucle/_sys/test_linux_facade.mojo
     tests/boucle/_sys/linux/test_errno.mojo
     tests/boucle/_sys/linux/test_fd.mojo
+    tests/boucle/test_ctypes_reexports.mojo
     tests/boucle/test_handle.mojo
     tests/boucle/test_token.mojo
     tests/boucle/test_error.mojo
     tests/boucle/test_buffer.mojo
     tests/boucle/net/test_options.mojo
     tests/boucle/net/test_ip.mojo
+    tests/boucle/net/test_ip_parse.mojo
+    tests/boucle/net/test_ip_display.mojo
     tests/boucle/net/test_addr.mojo
     tests/boucle/_sys/linux/test_mm.mojo
     tests/boucle/_sys/linux/test_ucontext.mojo
@@ -72,6 +75,10 @@ TESTS=(
     tests/boucle/_sys/linux/epoll/test_epoll.mojo
     tests/boucle/_sys/linux/net/test_syscalls.mojo
     tests/boucle/net/test_socket.mojo
+    tests/boucle/net/test_socket_setopt.mojo
+    tests/boucle/net/test_socket_connect.mojo
+    tests/boucle/net/test_socket_factories.mojo
+    tests/boucle/test_completion_reexports.mojo
     tests/boucle/test_completion.mojo
     tests/boucle/test_completion_io.mojo
     tests/boucle/test_completion_connect.mojo

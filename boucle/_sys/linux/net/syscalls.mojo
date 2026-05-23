@@ -6,6 +6,7 @@ multiple internal subpackage layers.
 """
 
 from std.ffi import external_call
+from std.memory import UnsafePointer
 
 from boucle.handle import RawHandle, OwnedHandle
 from boucle.net.addr import SocketAddr
@@ -40,5 +41,37 @@ def _bind[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
 @always_inline
 def _listen(ref handle: OwnedHandle, backlog: Backlog) raises:
     var res = external_call["listen", Int32](handle.raw(), backlog.value)
+    if res < 0:
+        raise String(Int(res))
+
+
+@always_inline
+def _setsockopt(
+    ref handle: OwnedHandle,
+    level: Int32,
+    optname: Int32,
+    value: Int32,
+) raises:
+    var val = value
+    # Pre-capture the pointer in a named local — passing
+    # UnsafePointer(to=val) inline can clobber val's stack slot
+    # during external_call arg marshaling.
+    var val_p = UnsafePointer(to=val)
+    var res = external_call["setsockopt", Int32](
+        handle.raw(),
+        level,
+        optname,
+        val_p,
+        UInt32(4),
+    )
+    if res < 0:
+        raise String(Int(res))
+
+
+@always_inline
+def _connect[Addr: SocketAddr](ref handle: OwnedHandle, ref addr: Addr) raises:
+    var res = external_call["connect", Int32](
+        handle.raw(), addr.addr_unsafe_ptr(), Int32(Addr.ADDR_LEN)
+    )
     if res < 0:
         raise String(Int(res))

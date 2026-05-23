@@ -6,7 +6,7 @@ CLOEXEC flags by default.
 """
 
 from boucle.handle import RawHandle, OwnedHandle
-from boucle.net.addr import SocketAddrStor
+from boucle.net.addr import SocketAddrStor, SocketAddrV4, SocketAddrV6
 from boucle.net.options import (
     AddrFamily,
     SocketType,
@@ -18,6 +18,14 @@ from boucle._sys.linux.net.socket import (
     socket as _sys_socket,
     bind as _sys_bind,
     listen as _sys_listen,
+)
+from boucle._sys.linux.net.syscalls import _setsockopt, _connect
+from boucle._sys.linux.raw import (
+    SOL_SOCKET,
+    SO_REUSEADDR,
+    SO_REUSEPORT,
+    IPPROTO_IPV6,
+    IPV6_V6ONLY,
 )
 
 
@@ -78,6 +86,47 @@ struct Socket:
             )
         )
 
+    @staticmethod
+    def tcp_listener_v6(port: UInt16, *, backlog: Int32 = 1024) raises -> Self:
+        """Creates a dual-stack TCP listener bound to `[::]:port`.
+
+        Sets `SO_REUSEADDR`, `SO_REUSEPORT`, and clears `IPV6_V6ONLY` so
+        the listener accepts both IPv6 and IPv4-mapped connections.
+        """
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.STREAM,
+            SocketFlags.NONBLOCK | SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR), Int32(1))
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT), Int32(1))
+        _setsockopt(handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY), Int32(0))
+        var addr = SocketAddrV6(0, 0, 0, 0, 0, 0, 0, 0, port=port)
+        _sys_bind(handle, addr)
+        _sys_listen(handle, Backlog(backlog))
+        return Self(handle^)
+
+    @staticmethod
+    def udp_listener_v6(port: UInt16) raises -> Self:
+        """Creates a dual-stack UDP listener bound to `[::]:port`.
+
+        Sets `SO_REUSEADDR`, `SO_REUSEPORT`, and clears `IPV6_V6ONLY` so
+        the socket receives both IPv6 and IPv4-mapped datagrams.
+        """
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.DGRAM,
+            SocketFlags.NONBLOCK | SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR), Int32(1))
+        _setsockopt(handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT), Int32(1))
+        _setsockopt(handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY), Int32(0))
+        var addr = SocketAddrV6(0, 0, 0, 0, 0, 0, 0, 0, port=port)
+        _sys_bind(handle, addr)
+        return Self(handle^)
+
     def bind[Addr: SocketAddrStor](self, ref addr: Addr) raises:
         """Binds the socket to the given address."""
         _sys_bind(self._handle, addr)
@@ -85,6 +134,84 @@ struct Socket:
     def listen(self, backlog: Backlog) raises:
         """Marks the socket as passive for accepting connections."""
         _sys_listen(self._handle, backlog)
+
+    def set_reuse_addr(self, value: Bool = True) raises:
+        """Sets `SO_REUSEADDR` on the socket."""
+        _setsockopt(
+            self._handle, Int32(SOL_SOCKET), Int32(SO_REUSEADDR),
+            Int32(1) if value else Int32(0),
+        )
+
+    def set_reuse_port(self, value: Bool = True) raises:
+        """Sets `SO_REUSEPORT` on the socket."""
+        _setsockopt(
+            self._handle, Int32(SOL_SOCKET), Int32(SO_REUSEPORT),
+            Int32(1) if value else Int32(0),
+        )
+
+    def set_v6only(self, value: Bool) raises:
+        """Sets `IPV6_V6ONLY` on an IPv6 socket. `False` enables dual-stack."""
+        _setsockopt(
+            self._handle, Int32(IPPROTO_IPV6), Int32(IPV6_V6ONLY),
+            Int32(1) if value else Int32(0),
+        )
+
+    def connect[Addr: SocketAddrStor](self, ref addr: Addr) raises:
+        """Blocking `connect(2)` to the given address."""
+        var stor = addr.addr_stor()
+        _connect(self._handle, stor)
+
+    @staticmethod
+    def tcp_connect(ref addr: SocketAddrV4) raises -> Self:
+        """Blocking TCP client to an IPv4 address."""
+        var handle = _sys_socket(
+            AddrFamily.INET,
+            SocketType.STREAM,
+            SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def tcp_connect(ref addr: SocketAddrV6) raises -> Self:
+        """Blocking TCP client to an IPv6 address."""
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.STREAM,
+            SocketFlags.CLOEXEC,
+            Protocol.TCP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def udp_connect(ref addr: SocketAddrV4) raises -> Self:
+        """Blocking UDP client to an IPv4 address (sets default peer)."""
+        var handle = _sys_socket(
+            AddrFamily.INET,
+            SocketType.DGRAM,
+            SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
+
+    @staticmethod
+    def udp_connect(ref addr: SocketAddrV6) raises -> Self:
+        """Blocking UDP client to an IPv6 address (sets default peer)."""
+        var handle = _sys_socket(
+            AddrFamily.INET6,
+            SocketType.DGRAM,
+            SocketFlags.CLOEXEC,
+            Protocol.UDP,
+        )
+        var stor = addr.addr_stor()
+        _connect(handle, stor)
+        return Self(handle^)
 
     @always_inline
     def raw(self) -> RawHandle:
