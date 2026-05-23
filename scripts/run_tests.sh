@@ -57,12 +57,48 @@ TESTS=(
     tests/boucle/test_coroutine_pool.mojo
 )
 
+# Tests that exercise io_uring (via raw syscalls or CompletionLoop) plus
+# epoll-on-pipe behavior that qemu-user-static cannot emulate. Set
+# SKIP_IO_URING_TESTS=1 (e.g. on the aarch64 qemu CI job) to skip them.
+SKIP_UNDER_QEMU=(
+    tests/boucle/_sys/linux/io_uring/test_setup.mojo
+    tests/boucle/_sys/linux/io_uring/test_nop.mojo
+    tests/boucle/_sys/linux/io_uring/test_ops.mojo
+    tests/boucle/_sys/linux/io_uring/test_provide_buffers.mojo
+    tests/boucle/_sys/linux/io_uring/test_register_buf_ring.mojo
+    tests/boucle/_sys/linux/io_uring/test_multishot_recv.mojo
+    tests/boucle/_sys/linux/io_uring/test_multishot_recvmsg.mojo
+    tests/boucle/_sys/linux/epoll/test_epoll.mojo
+    tests/boucle/test_completion.mojo
+    tests/boucle/test_completion_io.mojo
+    tests/boucle/test_completion_connect.mojo
+    tests/boucle/test_readiness.mojo
+    tests/boucle/test_stackful_io.mojo
+)
+
+is_skipped() {
+    local needle="$1"
+    for skip in "${SKIP_UNDER_QEMU[@]}"; do
+        if [ "$skip" = "$needle" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 cd "$PROJECT_DIR"
 
 PASS=0
 FAIL=0
+SKIP=0
 
 for test in "${TESTS[@]}"; do
+    if [ "${SKIP_IO_URING_TESTS:-0}" = "1" ] && is_skipped "$test"; then
+        echo "--- SKIPPED (SKIP_IO_URING_TESTS=1): $test ---"
+        echo ""
+        SKIP=$((SKIP + 1))
+        continue
+    fi
     echo "--- Running: $test ---"
     if mojo run -I . -D ASSERT=all "$test"; then
         echo "--- PASSED: $test ---"
@@ -74,7 +110,7 @@ for test in "${TESTS[@]}"; do
     echo ""
 done
 
-echo "Results: $PASS passed, $FAIL failed (out of ${#TESTS[@]})"
+echo "Results: $PASS passed, $FAIL failed, $SKIP skipped (out of ${#TESTS[@]})"
 if [ "$FAIL" -ne 0 ]; then
     exit 1
 fi

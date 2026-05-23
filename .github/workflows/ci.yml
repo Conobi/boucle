@@ -45,6 +45,7 @@ jobs:
             ln -sf /root/.local/bin/uv /usr/local/bin/uv
           env: |
             BOUCLE_TARGET_ARCH: aarch64
+            SKIP_IO_URING_TESTS: '1'
           run: |
             uv sync
             bash scripts/build.sh
