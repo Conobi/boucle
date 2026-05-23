@@ -3,7 +3,7 @@ from std.memory import UnsafePointer
 from std.testing import assert_true, assert_equal
 
 from boucle.net.socket import Socket
-from boucle.net.addr import SocketAddrV4, SocketAddrStorV4
+from boucle.net.addr import SocketAddrV4, SocketAddrV6, SocketAddrStorV4, SocketAddrStorV6
 from boucle.net.options import Backlog
 
 
@@ -18,6 +18,20 @@ def _getsockname_port_v4(ref s: Socket) raises -> UInt16:
     if res < 0:
         raise String("getsockname failed: ", Int(res))
     var be = stor.addr.sin_port
+    return (UInt16(be) >> 8) | ((UInt16(be) & UInt16(0xFF)) << 8)
+
+
+def _getsockname_port_v6(ref s: Socket) raises -> UInt16:
+    var stor = SocketAddrStorV6()
+    var stor_p = UnsafePointer(to=stor)
+    var len = UInt32(28)
+    var len_p = UnsafePointer(to=len)
+    var res = external_call["getsockname", Int32](
+        s.raw(), stor_p, len_p,
+    )
+    if res < 0:
+        raise String("getsockname failed: ", Int(res))
+    var be = stor.addr.sin6_port
     return (UInt16(be) >> 8) | ((UInt16(be) & UInt16(0xFF)) << 8)
 
 
@@ -77,5 +91,29 @@ def main() raises:
     assert_equal(recvd, 1)
 
     _ = external_call["close", Int32](peer_fd)
+
+    # udp_connect: bind dual-stack v6 listener, connect via v4 to 127.0.0.1.
+    var udp_server = Socket.udp_listener_v6(0)
+    var udp_port = _getsockname_port_v6(udp_server)
+    assert_true(udp_port != 0)
+
+    var udp_dest = SocketAddrV4(127, 0, 0, 1, port=udp_port)
+    var udp_client = Socket.udp_connect(udp_dest)
+    assert_true(udp_client.raw() > -1)
+
+    var udp_sent = _send_byte(udp_client, UInt8(0x37))
+    assert_equal(udp_sent, 1)
+
+    var udp_rx = UInt8(0)
+    var udp_rx_p = UnsafePointer(to=udp_rx)
+    var udp_recvd = Int64(-1)
+    for _ in range(1000):
+        udp_recvd = external_call["recv", Int64](
+            udp_server.raw(), udp_rx_p, UInt64(1), Int32(0),
+        )
+        if udp_recvd == 1:
+            break
+    assert_equal(udp_recvd, 1)
+    assert_equal(udp_rx, UInt8(0x37))
 
     print("All socket connect tests passed.")
