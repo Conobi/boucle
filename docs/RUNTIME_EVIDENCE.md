@@ -7,7 +7,7 @@ driving Boucle-backed servers (in companion repos / one-off harnesses)
 with off-the-shelf clients (curl, hyper-h2, aioquic).
 
 This file exists so the proof is durable inside this repo, not stranded
-in a reviewer's report.
+in a reviewer's notes.
 
 ## HTTP/1.1 — completion model
 
@@ -55,8 +55,8 @@ VM: Ubuntu 24.04.4 arm64, kernel `Linux 6.8.0-117-generic aarch64 GNU/Linux`,
 native arm64 syscall ABI, full io_uring support.
 
 Build: navette `hello_h1_server` built inside the VM as a native aarch64 ELF.
-`scripts/build.sh` auto-detected `uname -m == aarch64` and routed through
-`boucle/_sys/linux/raw/aarch64/*` via the build-time facade substitution.
+`boucle/socle/linux/raw/` auto-detects `uname -m == aarch64` via comptime
+arch dispatch.
 
 Transport proof — `strace` on the running server:
 
@@ -93,9 +93,8 @@ extending to h2/h3 is navette-side cross-compilation work.
 ## How to reproduce
 
 These transcripts come from the companion `navette` / harness work that
-sits on top of Boucle. They were captured live during pass-2 review and
-should be re-run whenever the public Boucle surface area changes in a
-way that could affect h1/h2/h3 server bring-up. The boucle examples in
-`examples/` exercise the lower-level send/recv/accept/connect paths in
-a single process — they are not enough to anchor "real client speaks to
-real server" evidence on their own.
+sits on top of Boucle. They should be re-run whenever the public Boucle
+surface area changes in a way that could affect h1/h2/h3 server bring-up.
+The boucle examples in `examples/` exercise the lower-level
+send/recv/accept/connect paths in a single process — they are not enough
+to anchor "real client speaks to real server" evidence on their own.
