@@ -64,16 +64,16 @@ are marked ◐.
 |---|---|---|---|---|---|---|---|
 | TCP accept / connect / recv / send | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Connect with timeout | ✅ | — | ✅ | ✅ (`timeout` combinator) | ✅ (`timeout` combinator) | ✅ (compose timer + cancel) | ❌ |
-| UDP send_to / recv_from | ◐ blocking `Socket` only (`send_to`, `recv_from_v4` / `recv_from_v6`) | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| sendmsg / recvmsg | ◐ raw `CompletionLoop`, caller builds `msghdr` | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| UDP send_to / recv_from | ✅ `WatchLoop.send_to` / `recv_from` (completion), plus blocking `Socket` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| sendmsg / recvmsg | ✅ `WatchLoop.send_msg` / `recv_msg` (`Message`, cmsg walker, ECN); raw `CompletionLoop` too | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Vectored I/O | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Unix domain sockets | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Pipes as sources | ✅ (readiness, raw fd) | ✅ | ✅ | ✅ | ✅ | ✅ (generic stream) | ❌ |
-| File open / read / write / fsync | ❌ | ❌ by design | ✅ (thread pool) | ✅ | ✅ | ◐ read/write only, thread pool on epoll/kqueue | ✅ |
+| File open / read / write / fsync | ◐ read/write/fsync (no open); io_uring native, epoll via thread pool | ❌ by design | ✅ (thread pool) | ✅ | ✅ | ◐ read/write only, thread pool on epoll/kqueue | ✅ |
 | Timers | ✅ | ❌ by design | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Cancel an in-flight op | ◐ raw `CompletionLoop` only, not on `WatchLoop` | deregister | subset of request types | ✅ (best effort) | ✅ | ✅ | ❌ |
-| Multishot accept / recv | ◐ driver only | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Provided buffers / buffer rings | ◐ driver only | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Multishot accept / recv | ◐ multishot recvmsg on `WatchLoop` (`recv_msg_multishot`, epoll-emulated); multishot accept driver only | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Provided buffers / buffer rings | ✅ `WatchLoop.buffer_pool` (buffer ring on io_uring, free list on epoll) | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Zero-copy send | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
 | Splice / sendfile | ❌ | ❌ | sendfile | ✅ | ✅ | ❌ | ❌ |
 | Signals | ❌ | ❌ | ✅ | ✅ | ✅ (ctrlc) | ❌ roadmap | ❌ |
@@ -81,8 +81,8 @@ are marked ◐.
 | Filesystem events | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ roadmap | ❌ |
 | TTY | ❌ | ❌ | ✅ | ❌ | ❌ | ◐ generic stream | ❌ |
 | DNS resolution | ❌ | ❌ | ✅ (thread pool) | ✅ (thread pool) | ❌ | ❌ | ❌ |
-| Thread pool for blocking work | ❌ | ❌ by design | ✅ | ✅ | ✅ | ✅ optional | ❌ |
-| Cross-thread wakeup | ❌ | ✅ `Waker` | ✅ `uv_async_t` | ✅ | ✅ | ✅ `Async` | ✅ eventfd / EVFILT_USER |
+| Thread pool for blocking work | ✅ `WorkerPool` (pthread, eventfd wakeup) | ❌ by design | ✅ | ✅ | ✅ | ✅ optional | ❌ |
+| Cross-thread wakeup | ✅ eventfd (`WorkerPool` wakeup) | ✅ `Waker` | ✅ `uv_async_t` | ✅ | ✅ | ✅ `Async` | ✅ eventfd / EVFILT_USER |
 
 ## 4. Sockets, buffers, concurrency, errors, extensibility
 
@@ -133,18 +133,21 @@ the path, and it is the caller's: reuse it via `take_buffer()`.
 
 - **Platforms.** Linux only. Every other library runs on macOS, and all but
   monoio's stable line run on Windows. mio and libuv cover a dozen more.
-- **Operation surface.** No file I/O, no vectored I/O, no Unix domain sockets,
-  no signals, processes, filesystem events or DNS. libuv and compio have all of
-  these. Boucle's public completion API is five operations: accept, connect,
-  connect with timeout, recv, send.
-- **io_uring depth.** Multishot accept and recv, provided buffers and buffer
-  rings exist on the io_uring driver but are not reachable from `WatchLoop` or
-  `CompletionLoop`. compio ships all of them, plus zero-copy send and splice,
-  on its public API.
+- **Operation surface.** File read/write/fsync landed (io_uring native, epoll via
+  thread pool); no file open, no vectored I/O, no Unix domain sockets, no
+  signals, processes, filesystem events or DNS. libuv and compio have all of
+  these. Boucle's public completion API: accept, connect, connect with
+  timeout, recv, send, send_msg/recv_msg, send_to/recv_from, file read/write/
+  fsync, buffer pools and a multishot recvmsg stream.
+- **io_uring depth.** Multishot recvmsg and provided buffers are on
+  `WatchLoop` and `CompletionLoop` on both backends. Multishot accept and
+  multishot TCP recv remain driver-only. compio also ships zero-copy send and
+  splice on its public API.
 - **Cancellation.** `WatchLoop` has no way to cancel an operation except the
   built-in connect timeout. Every other library except TigerBeetle has one.
-- **Concurrency.** No cross-thread wakeup. A blocked `run()` cannot be woken
-  from another thread. Every other library provides this.
+- **Concurrency.** Cross-thread wakeup exists only as the `WorkerPool`'s
+  eventfd path; there is no general-purpose `Waker` a user thread can fire to
+  unblock `run()`. Every other library except TigerBeetle provides one.
 - **Socket options.** No `TCP_NODELAY`, no keepalive, no buffer sizing. These
   are table stakes in mio, libuv, compio, monoio and TigerBeetle.
 - **Async integration.** No async/await, no executor, no waker. compio and
@@ -170,7 +173,10 @@ the path, and it is the caller's: reuse it via `take_buffer()`.
 Boucle: this repository at the commit that added this file. Readiness API in
 `boucle/readiness.mojo`, completion API in `boucle/watch/loop.mojo`, driver
 trait in `boucle/drivers/driver.mojo`, io_uring-only methods in
-`boucle/drivers/io_uring.mojo`, socket options in `boucle/net/socket.mojo`.
+`boucle/drivers/io_uring.mojo`, socket options in `boucle/net/socket.mojo`,
+aligned buffers in `boucle/buffer/aligned.mojo`, file I/O futures in
+`boucle/watch/read_file.mojo` / `write_file.mojo` / `fsync.mojo`, worker pool
+in `boucle/pool/pool.mojo`.
 
 mio: [README](https://github.com/tokio-rs/mio), [crates.io](https://crates.io/crates/mio),
 [`Poll`](https://docs.rs/mio/latest/mio/struct.Poll.html),
