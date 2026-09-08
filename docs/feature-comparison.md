@@ -71,7 +71,7 @@ are marked ◐.
 | Pipes as sources | ✅ (readiness, raw fd) | ✅ | ✅ | ✅ | ✅ | ✅ (generic stream) | ❌ |
 | File open / read / write / fsync | ◐ read/write/fsync (no open); io_uring native, epoll via thread pool | ❌ by design | ✅ (thread pool) | ✅ | ✅ | ◐ read/write only, thread pool on epoll/kqueue | ✅ |
 | Timers | ✅ | ❌ by design | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Cancel an in-flight op | ◐ raw `CompletionLoop` only, not on `WatchLoop` | deregister | subset of request types | ✅ (best effort) | ✅ | ✅ | ❌ |
+| Cancel an in-flight op | ◐ timers on `WatchLoop`: cancel and reset; other ops on raw `CompletionLoop` only | deregister | subset of request types | ✅ (best effort) | ✅ | ✅ | ❌ |
 | Multishot accept / recv | ◐ multishot recvmsg on `WatchLoop` (`recv_msg_multishot`, epoll-emulated); multishot accept driver only | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Provided buffers / buffer rings | ✅ `WatchLoop.buffer_pool` (buffer ring on io_uring, free list on epoll) | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Zero-copy send | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
@@ -143,8 +143,10 @@ the path, and it is the caller's: reuse it via `take_buffer()`.
   `WatchLoop` and `CompletionLoop` on both backends. Multishot accept and
   multishot TCP recv remain driver-only. compio also ships zero-copy send and
   splice on its public API.
-- **Cancellation.** `WatchLoop` has no way to cancel an operation except the
-  built-in connect timeout. Every other library except TigerBeetle has one.
+- **Cancellation.** `WatchLoop` cancels and resets timers only (plus the
+  built-in connect timeout); every other operation can be cancelled on the
+  raw `CompletionLoop` alone. Every other library except TigerBeetle cancels
+  any operation.
 - **Concurrency.** Cross-thread wakeup exists only as the `WorkerPool`'s
   eventfd path; there is no general-purpose `Waker` a user thread can fire to
   unblock `run()`. Every other library except TigerBeetle provides one.
