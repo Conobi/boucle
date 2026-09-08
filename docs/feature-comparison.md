@@ -92,13 +92,13 @@ are marked ◐.
 | `SO_REUSEADDR` / `SO_REUSEPORT` | ✅ / ✅ | via socket2 | ✅ / ✅ | ✅ | ✅ | reuseaddr only | ✅ |
 | `TCP_NODELAY` | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Keepalive | ❌ | via socket2 | ✅ | via socket2 | ✅ | ❌ | ✅ |
-| Buffer size, multicast, TTL | ❌ | multicast, TTL | ✅ | ✅ | buffer size | ❌ | buffer size |
+| Buffer size, multicast, TTL | ✅ buffer size (`SO_RCVBUF`/`SO_SNDBUF`), UDP GSO/GRO (`UDP_SEGMENT`/`UDP_GRO`); no multicast or TTL | multicast, TTL | ✅ | ✅ | buffer size | ❌ | buffer size |
 | Buffer ownership (completion path) | owned, moved into loop, returned by `result()` | — | caller-owned, alive until callback | owned, returned in `BufResult` | owned, returned in `BufResult` | caller-owned, alive until callback | caller-owned, alive until callback |
 | Buffer ownership (readiness path) | caller-owned slices | caller-owned slices | `alloc_cb` per read | — | — | — | — |
 | Allocation per submitted operation | none steady-state: per-kind chunked slab, one settle-queue push per op | none (caller allocates) | none (caller allocates) | one heap cell per op (`RawOp` behind `Key<T>`) | slab of lifecycles, op data lives in the future | none (caller allocates) | none (caller allocates) |
 | Programming style | futures resolved by `run()`; callbacks on raw loop; stackful coroutines | sync poll loop | callbacks | async/await | async/await | callbacks | callbacks |
 | Executor bundled | ❌ | ❌ | loop only | ✅ | ✅ | ❌ | ❌ |
-| Threading | single-threaded, unenforced | one `Poll` per thread, user's job | one loop per thread | thread-per-core dispatcher | thread-per-core | one loop per thread | single-threaded |
+| Threading | single-threaded; enforced by the kernel on io_uring via `SINGLE_ISSUER` (EEXIST from any other thread), unenforced on epoll | one `Poll` per thread, user's job | one loop per thread | thread-per-core dispatcher | thread-per-core | one loop per thread | single-threaded |
 | Drop a future / completion mid-op | safe; loop keeps state until completion | — | — | cancels, best effort | async-cancel, buffer held | UB (plain memory) | — |
 | Loop destroyed with ops in flight | buffers leaked on purpose (bounded); slab chunks too if a future is still held | — | must `uv_close` first | ring closed before freeing keys | — | — | — |
 | Error type | `IOError` (errno), typed `raises` | `io::Error` | negative int codes | `io::Error` | `io::Error` | per-op error sets | per-op error sets |
@@ -148,8 +148,8 @@ the path, and it is the caller's: reuse it via `take_buffer()`.
 - **Concurrency.** Cross-thread wakeup exists only as the `WorkerPool`'s
   eventfd path; there is no general-purpose `Waker` a user thread can fire to
   unblock `run()`. Every other library except TigerBeetle provides one.
-- **Socket options.** No `TCP_NODELAY`, no keepalive, no buffer sizing. These
-  are table stakes in mio, libuv, compio, monoio and TigerBeetle.
+- **Socket options.** No `TCP_NODELAY`, no keepalive. These are table stakes
+  in mio, libuv, compio, monoio and TigerBeetle.
 - **Async integration.** No async/await, no executor, no waker. compio and
   monoio are full runtimes. Boucle offers `run()` plus futures you read
   afterwards, and a stackful coroutine bridge on ucontext.
