@@ -65,7 +65,7 @@ are marked ◐.
 | TCP accept / connect / recv / send | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Connect with timeout | ✅ | — | ✅ | ✅ (`timeout` combinator) | ✅ (`timeout` combinator) | ✅ (compose timer + cancel) | ❌ |
 | UDP send_to / recv_from | ✅ `WatchLoop.send_to` / `recv_from` (completion), plus blocking `Socket` | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| sendmsg / recvmsg | ✅ `WatchLoop.send_msg` / `recv_msg` (`Message`, cmsg walker, ECN); raw `CompletionLoop` too | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| sendmsg / recvmsg | ✅ `WatchLoop.send_msg` / `recv_msg` (`Message`, cmsg walker, ECN, GSO/GRO records); raw `CompletionLoop` too | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | Vectored I/O | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Unix domain sockets | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Pipes as sources | ✅ (readiness, raw fd) | ✅ | ✅ | ✅ | ✅ | ✅ (generic stream) | ❌ |
